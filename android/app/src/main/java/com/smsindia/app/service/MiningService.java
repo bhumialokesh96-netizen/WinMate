@@ -62,7 +62,7 @@ public class MiningService extends Service {
         Notification notification = new NotificationCompat.Builder(this, "MiningChannel")
                 .setContentTitle("WinMate Mining Active")
                 .setContentText("Generating revenue via SMS...")
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_launcher)
 
                 .setContentIntent(pendingIntent)
                 .build();
