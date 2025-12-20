@@ -1,0 +1,45 @@
+name: winmate
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # BACKEND
+  supabase_flutter: ^1.10.0
+  
+  # STATE MANAGEMENT
+  provider: ^6.0.5
+  
+  # UI & ANIMATIONS
+  lottie: ^2.7.0               # For Radar, Gift Box, Confetti
+  flutter_fortune_wheel: ^1.2.0 # For Lucky Wheel
+  google_fonts: ^6.1.0         # Nice fonts
+  percent_indicator: ^4.2.3    # Progress bars
+  
+  # UTILITIES
+  shared_preferences: ^2.2.0
+  rxdart: ^0.27.7              # Streams for Lucky Wheel
+  device_info_plus: ^9.0.3     # Get Device ID
+  permission_handler: ^10.4.3  # Handle SMS Permissions easily
+  
+  # ICONS
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  # ASSETS REGISTRATION
+  assets:
+    - assets/animations/       # Registers radar.json
+    - assets/images/           # (Future) Registers wheel.png, etc.
