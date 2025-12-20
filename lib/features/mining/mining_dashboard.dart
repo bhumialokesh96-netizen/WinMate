@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lottie/lottie.dart';
+import 'sim_selector.dart'; // <--- IMPORT THE NEW FILE
 
 class MiningDashboard extends StatefulWidget {
   const MiningDashboard({super.key});
@@ -13,121 +14,67 @@ class MiningDashboard extends StatefulWidget {
 }
 
 class _MiningDashboardState extends State<MiningDashboard> {
-  static const platform = MethodChannel('com.smsindia.app/mining');
-  bool isMining = false;
-  int logsToday = 0;
-  double earnedToday = 0.0;
-  Timer? _uiTimer;
-  
+  static const platform = MethodChannel('com.winmate.app/mining');
   final SupabaseClient supabase = Supabase.instance.client;
+  
+  bool isMining = false;
+  double balance = 0.00;
+  int _selectedSimSlot = 0; // <--- DEFAULT SIM 1 (0)
+  String statusLog = "Ready to start Native Mining Node.";
+  Timer? _balanceWatcher;
 
   @override
   void initState() {
     super.initState();
-    _checkMiningStatus();
-    _loadDailyStats();
+    _loadBalance();
+    _balanceWatcher = Timer.periodic(const Duration(seconds: 5), (_) => _loadBalance());
   }
 
   @override
   void dispose() {
-    _uiTimer?.cancel();
+    _balanceWatcher?.cancel();
     super.dispose();
   }
 
-  // 1. Check if Service is already running
-  Future<void> _checkMiningStatus() async {
-    try {
-      final bool active = await platform.invokeMethod('isServiceRunning');
-      setState(() {
-        isMining = active;
-      });
-      if (active) {
-        _startUiTicker();
-      }
-    } catch (e) {
-      print("Error checking status: $e");
-    }
-  }
-
-  // 2. Load Stats from Supabase
-  Future<void> _loadDailyStats() async {
+  Future<void> _loadBalance() async {
     final user = supabase.auth.currentUser;
     if (user != null) {
-      // Get logs created today
-      final today = DateTime.now().toIso8601String().split('T')[0];
-      final response = await supabase
-          .from('mining_logs')
-          .select()
-          .eq('user_id', user.id)
-          .gte('created_at', today); // Filter by date (approx)
-      
-      if (response != null) {
-        final List data = response as List;
-        setState(() {
-          logsToday = data.length;
-          earnedToday = logsToday * 2.0; // ₹2.0 per log
-        });
-      }
+      try {
+        final data = await supabase.from('wallet').select('balance').eq('user_id', user.id).single();
+        if (mounted) setState(() => balance = (data['balance'] as num).toDouble());
+      } catch (e) { }
     }
   }
 
-  // 3. Start/Stop Mining Logic
   Future<void> _toggleMining() async {
-    if (isMining) {
-      // STOP
-      await platform.invokeMethod('stopMining');
-      setState(() => isMining = false);
-      _uiTimer?.cancel();
-    } else {
-      // START
-      if (await Permission.sms.request().isGranted) {
-        await platform.invokeMethod('startMining');
-        setState(() => isMining = true);
-        _startUiTicker();
-        _simulateMiningForDemo(); // TEMPORARY: Triggers DB update for testing
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("SMS Permission Required")));
-      }
-    }
-  }
+    final user = supabase.auth.currentUser;
+    if (user == null) return;
 
-  // --- CRITICAL: THE MONEY MAKER ---
-  // Since we can't easily call Supabase from background Java yet,
-  // We will simulate the DB update here for the demo.
-  // In Phase 7, we connect the Native Service callback.
-  void _simulateMiningForDemo() {
-    _uiTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
+    try {
       if (!isMining) {
-        timer.cancel();
-        return;
-      }
-      
-      final user = supabase.auth.currentUser;
-      if (user != null) {
-        // INSERT LOG -> TRIGGERS SQL -> UPDATES WALLET
-        await supabase.from('mining_logs').insert({
-          'user_id': user.id,
-          'sms_count': 1,
-          'earned_amount': 2.00, // ₹2.00
+        // PASS SELECTED SIM SLOT TO JAVA
+        final String result = await platform.invokeMethod('START_MINING', {
+          'userId': user.id,
+          'simSlot': _selectedSimSlot, // <--- SENDING SELECTION (0 or 1)
         });
-        
-        // Refresh UI
-        _loadDailyStats();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(
-             content: Text("SMS Sent! ₹2.00 Added"), 
-             duration: Duration(milliseconds: 1000),
-             backgroundColor: Colors.green,
-           )
-        );
-      }
-    });
-  }
 
-  void _startUiTicker() {
-    // Just updates the UI stats periodically
-    _uiTimer?.cancel();
+        setState(() {
+          isMining = true;
+          statusLog = "Scanning Network (SIM ${_selectedSimSlot + 1}): $result";
+        });
+      } else {
+        final String result = await platform.invokeMethod('STOP_MINING');
+        setState(() {
+          isMining = false;
+          statusLog = "Node Offline: $result";
+        });
+      }
+    } on PlatformException catch (e) {
+      setState(() {
+        statusLog = "Error: '${e.message}'.";
+        isMining = false;
+      });
+    }
   }
 
   @override
@@ -135,120 +82,96 @@ class _MiningDashboardState extends State<MiningDashboard> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A2E),
       appBar: AppBar(
-        title: Text("Mining Node", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        title: Text("SMS Node", style: GoogleFonts.poppins(color: Colors.white)),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: SingleChildScrollView( // Added ScrollView to prevent overflow
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // --- STATUS CARD ---
+            // STATUS BADGE
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
-                color: isMining ? const Color(0xFF16213E) : const Color(0xFF252525),
+                color: isMining ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isMining ? Colors.green : Colors.white10,
-                  width: 2,
+                border: Border.all(color: isMining ? Colors.green : Colors.red),
+              ),
+              child: Text(
+                isMining ? "● ACTIVE (SIM ${_selectedSimSlot + 1})" : "● OFFLINE",
+                style: GoogleFonts.poppins(
+                  color: isMining ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
                 ),
               ),
-              child: Column(
-                children: [
-                  Icon(
-                    isMining ? Icons.wifi_tethering : Icons.wifi_off,
-                    size: 60,
-                    color: isMining ? Colors.green : Colors.grey,
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    isMining ? "MINING ACTIVE" : "MINING PAUSED",
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isMining ? Colors.green : Colors.grey,
+            ),
+            
+            const SizedBox(height: 20),
+
+            // RADAR
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: isMining
+                  ? Lottie.asset('assets/animations/radar.json', fit: BoxFit.contain)
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.wifi_tethering_off, size: 80, color: Colors.grey.withOpacity(0.3)),
+                        const SizedBox(height: 10),
+                        Text("Tap Start to Scan", style: GoogleFonts.poppins(color: Colors.grey)),
+                      ],
                     ),
-                  ),
-                  Text(
-                    isMining ? "Processing transactions..." : "Tap button to start",
-                    style: GoogleFonts.poppins(color: Colors.white54, fontSize: 12),
-                  ),
-                ],
-              ),
             ),
 
+            const SizedBox(height: 20),
+
+            // BALANCE
+            Text("Wallet Balance", style: GoogleFonts.poppins(color: Colors.grey)),
+            Text(
+              "₹${balance.toStringAsFixed(2)}", 
+              style: GoogleFonts.poppins(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white)
+            ),
+            
             const SizedBox(height: 30),
 
-            // --- STATS GRID ---
-            Row(
-              children: [
-                Expanded(child: _buildStatCard("SMS Sent", "$logsToday", Icons.message, Colors.blue)),
-                const SizedBox(width: 15),
-                Expanded(child: _buildStatCard("Earned Today", "₹${earnedToday.toStringAsFixed(0)}", Icons.attach_money, Colors.orange)),
-              ],
+            // --- SIM SELECTOR WIDGET ---
+            SimSelector(
+              selectedSlot: _selectedSimSlot,
+              isMining: isMining, // Lock if mining
+              onSimChanged: (slot) {
+                setState(() => _selectedSimSlot = slot);
+              },
             ),
+            // ---------------------------
 
-            const Spacer(),
+            const SizedBox(height: 30),
+            
+            Text(statusLog, textAlign: TextAlign.center, style: GoogleFonts.poppins(color: Colors.white38, fontSize: 12)),
+            const SizedBox(height: 10),
 
-            // --- BIG BUTTON ---
-            GestureDetector(
-              onTap: _toggleMining,
-              child: Container(
-                height: 80,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isMining 
-                      ? [Colors.redAccent, Colors.red] 
-                      : [const Color(0xFFE94560), const Color(0xFF0F3460)],
-                  ),
-                  borderRadius: BorderRadius.circular(40),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isMining ? Colors.red : const Color(0xFFE94560)).withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    )
-                  ],
+            // BUTTON
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: _toggleMining,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isMining ? Colors.red : const Color(0xFFE94560),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  elevation: 5,
                 ),
-                child: Center(
-                  child: Text(
-                    isMining ? "STOP MINING" : "START MINING",
-                    style: GoogleFonts.poppins(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
+                child: Text(
+                  isMining ? "STOP NODE" : "START NODE",
+                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF16213E),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 30),
-          const SizedBox(height: 10),
-          Text(value, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-          Text(title, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white54)),
-        ],
       ),
     );
   }
