@@ -21,7 +21,7 @@
     <application
         android:label="WinMate"
         android:name="${applicationName}"
-        android:icon="@drawable/ic_launcher">
+        android:icon="@mipmap/ic_launcher">
 
         <!-- FLUTTER ACTIVITY -->
         <activity
