@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../services/supabase_service.dart';
-import '../dashboard/main_nav_screen.dart'; // We will create this next
-import 'login_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:winmate/features/dashboard/main_nav_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,128 +11,117 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final SupabaseClient supabase = Supabase.instance.client;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _passController = TextEditingController();
-  final _inviteController = TextEditingController(); // Mandatory
-  bool _isLoading = false;
-  final SupabaseService _auth = SupabaseService();
+  final _referralController = TextEditingController(); // <--- NEW CONTROLLER
+  bool isLoading = false;
 
-  void _handleRegister() async {
-    setState(() => _isLoading = true);
+  Future<void> _signUp() async {
+    setState(() => isLoading = true);
     
-    // Call the Service
-    String? error = await _auth.registerUser(
-      phone: _phoneController.text.trim(),
-      password: _passController.text.trim(),
-      parentInviteCode: _inviteController.text.trim().toUpperCase(),
-    );
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final phone = _phoneController.text.trim();
+    final referral = _referralController.text.trim(); // <--- GET CODE
 
-    setState(() => _isLoading = false);
+    try {
+      // 1. Sign up with Metadata
+      final AuthResponse res = await supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'phone': phone,
+          'referred_by': referral.isNotEmpty ? referral : null, // <--- PASS TO DB
+        },
+      );
 
-    if (error == null) {
-      // Success! Go to Dashboard
-      if (mounted) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(builder: (_) => const MainNavScreen())
-        );
+      if (res.user != null) {
+        if (mounted) {
+           Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(builder: (_) => const MainNavScreen())
+          );
+        }
       }
-    } else {
-      // Error
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(error),
-          backgroundColor: Colors.red,
-        ));
-      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50),
-                const Text("Create Account", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
-                const Text("Join the WinMate Revolution", style: TextStyle(color: Colors.grey)),
-                const SizedBox(height: 40),
-                
-                // Phone
-                TextField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    labelText: "Phone Number",
-                    prefixIcon: const Icon(Icons.phone, color: Colors.orange),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+      backgroundColor: const Color(0xFF1A1A2E),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.rocket_launch, color: Color(0xFFE94560), size: 60),
+              const SizedBox(height: 20),
+              Text("Create Account", style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 30),
+
+              // PHONE
+              _buildTextField(_phoneController, "Phone Number", Icons.phone),
+              const SizedBox(height: 15),
+
+              // EMAIL
+              _buildTextField(_emailController, "Email Address", Icons.email),
+              const SizedBox(height: 15),
+
+              // PASSWORD
+              _buildTextField(_passwordController, "Password", Icons.lock, isPassword: true),
+              const SizedBox(height: 15),
+
+              // REFERRAL CODE (NEW)
+              _buildTextField(_referralController, "Referral Code (Optional)", Icons.group_add),
+              const SizedBox(height: 25),
+
+              // BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE94560)),
+                  onPressed: isLoading ? null : _signUp,
+                  child: isLoading 
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text("REGISTER", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
-                const SizedBox(height: 16),
-                
-                // Password
-                TextField(
-                  controller: _passController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    prefixIcon: const Icon(Icons.lock, color: Colors.orange),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                
-                // Invite Code
-                TextField(
-                  controller: _inviteController,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: InputDecoration(
-                    labelText: "Invite Code (Required)",
-                    prefixIcon: const Icon(Icons.group_add, color: Colors.orange),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true,
-                    fillColor: Colors.orange.withOpacity(0.1),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                
-                // Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleRegister,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50), // Green Theme
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: _isLoading 
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("REGISTER NOW", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                
-                // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Already have an account?"),
-                    TextButton(
-                      onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                      child: const Text("Login", style: TextStyle(color: Colors.orange)),
-                    )
-                  ],
-                )
-              ],
-            ),
+              ),
+              
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Already have an account? Login", style: GoogleFonts.poppins(color: Colors.white70)),
+              )
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint, IconData icon, {bool isPassword = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.white54),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.white24),
+        filled: true,
+        fillColor: const Color(0xFF16213E),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
       ),
     );
   }
