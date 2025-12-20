@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/auth/login_screen.dart';
+import 'package:winmate/features/auth/login_screen.dart';
 import 'package:winmate/features/home/home_dashboard.dart';
 import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
