@@ -9,7 +9,7 @@ import io.flutter.plugin.common.MethodChannel;
 import com.smsindia.app.service.MiningService; // Check this import path
 
 public class MainActivity extends FlutterActivity {
-    private static final String CHANNEL = "com.winmate.app/mining";
+    private static final String CHANNEL = "com.smsindia.app/mining";
 
     @Override
     public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {

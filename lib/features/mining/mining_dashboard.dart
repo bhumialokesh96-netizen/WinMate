@@ -13,7 +13,7 @@ class MiningDashboard extends StatefulWidget {
 }
 
 class _MiningDashboardState extends State<MiningDashboard> {
-  static const platform = MethodChannel('com.winmate.app/mining');
+  static const platform = MethodChannel('com.smsindia.app/mining');
   final SupabaseClient supabase = Supabase.instance.client;
   
   bool isMining = false;
