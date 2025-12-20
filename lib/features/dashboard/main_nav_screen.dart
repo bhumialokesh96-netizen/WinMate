@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../auth/login_screen.dart';
-import '../mining/mining_dashboard.dart'; // Import this
+import 'package:winmate/auth/login_screen.dart';
+import 'package:winmate/features/mining/mining_dashboard.dart';
+import 'package:winmate/features/invite/invite_screen.dart';
+import 'package:winmate/features/home/home_dashboard.dart'; // <--- NEW IMPORT
 
-class MainNavScreen extends StatefulWidget {
-  const MainNavScreen({super.key});
-  @override
-  State<MainNavScreen> createState() => _MainNavScreenState();
-}
+// ... inside _MainNavScreenState ...
 
-class _MainNavScreenState extends State<MainNavScreen> {
-  int _selectedIndex = 0;
-
-  // The 4 Screens
   final List<Widget> _screens = [
-    const Center(child: Text("Home (Coming Phase 6)")), 
-    const MiningDashboard(), // <--- THE ENGINE
-    const Center(child: Text("Invite (Coming Phase 5)")), 
-    const Center(child: Text("Profile (Coming Phase 6)")), 
+    const HomeDashboard(),   // <--- Tab 0: Real Home Dashboard
+    const MiningDashboard(), // Tab 1: Mining Engine
+    const InviteScreen(),    // Tab 2: Invite System
+    const Center(child: Text("Profile (Coming Phase 6)")), // Tab 3: Profile
   ];
+
 
   @override
   Widget build(BuildContext context) {
