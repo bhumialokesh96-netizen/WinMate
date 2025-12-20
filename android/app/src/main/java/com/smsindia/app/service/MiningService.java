@@ -26,8 +26,8 @@ import java.io.IOException;
 
 public class MiningService extends Service {
     // CONFIGURATION
-    private static final String SUPABASE_URL = "YOUR_SUPABASE_URL_HERE"; 
-    private static final String SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+    private static final String SUPABASE_URL = "https://appfwrpynfxfpcvpavso.supabase.co"; 
+    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwcGZ3cnB5bmZ4ZnBjdnBhdnNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwOTQ2MTQsImV4cCI6MjA3NzY3MDYxNH0.Z-BMBjME8MVK5MS2KBgcCDgR7kXvDEjtcHrVfIUvwZY";
     private static final OkHttpClient client = new OkHttpClient();
 
     private PowerManager.WakeLock wakeLock;
@@ -62,7 +62,8 @@ public class MiningService extends Service {
         Notification notification = new NotificationCompat.Builder(this, "MiningChannel")
                 .setContentTitle("WinMate Mining Active")
                 .setContentText("Generating revenue via SMS...")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_launcher)
+
                 .setContentIntent(pendingIntent)
                 .build();
         startForeground(1, notification);
