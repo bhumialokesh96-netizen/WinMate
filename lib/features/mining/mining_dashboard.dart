@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lottie/lottie.dart';
-import 'sim_selector.dart'; // <--- IMPORT THE NEW FILE
+// Note: We removed the import for sim_selector.dart because it is defined below!
 
 class MiningDashboard extends StatefulWidget {
   const MiningDashboard({super.key});
@@ -19,7 +19,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
   
   bool isMining = false;
   double balance = 0.00;
-  int _selectedSimSlot = 0; // <--- DEFAULT SIM 1 (0)
+  int _selectedSimSlot = 0; 
   String statusLog = "Ready to start Native Mining Node.";
   Timer? _balanceWatcher;
 
@@ -55,7 +55,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
         // PASS SELECTED SIM SLOT TO JAVA
         final String result = await platform.invokeMethod('START_MINING', {
           'userId': user.id,
-          'simSlot': _selectedSimSlot, // <--- SENDING SELECTION (0 or 1)
+          'simSlot': _selectedSimSlot, 
         });
 
         setState(() {
@@ -87,7 +87,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
         title: Text("SMS Node", style: GoogleFonts.poppins(color: Colors.white)),
         centerTitle: true,
       ),
-      body: SingleChildScrollView( // Added ScrollView to prevent overflow
+      body: SingleChildScrollView( 
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
@@ -141,7 +141,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
             // --- SIM SELECTOR WIDGET ---
             SimSelector(
               selectedSlot: _selectedSimSlot,
-              isMining: isMining, // Lock if mining
+              isMining: isMining, 
               onSimChanged: (slot) {
                 setState(() => _selectedSimSlot = slot);
               },
@@ -171,6 +171,86 @@ class _MiningDashboardState extends State<MiningDashboard> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------
+// SIM SELECTOR WIDGET (Embedded here to fix Build Error)
+// ---------------------------------------------------------
+class SimSelector extends StatelessWidget {
+  final int selectedSlot;
+  final Function(int) onSimChanged;
+  final bool isMining; 
+
+  const SimSelector({
+    super.key,
+    required this.selectedSlot,
+    required this.onSimChanged,
+    required this.isMining,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Select SIM Card",
+          style: GoogleFonts.poppins(color: Colors.white54, fontSize: 14),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            _buildSimCard(context, "SIM 1", 0),
+            const SizedBox(width: 15),
+            _buildSimCard(context, "SIM 2", 1),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSimCard(BuildContext context, String title, int slotIndex) {
+    final isSelected = selectedSlot == slotIndex;
+    
+    return Expanded(
+      child: GestureDetector(
+        onTap: isMining ? null : () => onSimChanged(slotIndex),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          decoration: BoxDecoration(
+            color: isSelected 
+                ? const Color(0xFFE94560).withOpacity(0.2) 
+                : const Color(0xFF16213E),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? const Color(0xFFE94560) : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.sim_card,
+                color: isSelected ? const Color(0xFFE94560) : Colors.grey,
+                size: 30,
+              ),
+              const SizedBox(height: 5),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  color: isSelected ? Colors.white : Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (isSelected)
+                const Icon(Icons.check_circle, color: Color(0xFFE94560), size: 16)
+            ],
+          ),
         ),
       ),
     );
