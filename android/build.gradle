@@ -1,18 +1,18 @@
-buildscript {
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
-    dependencies {
-        // Based on your error log versions
-        classpath 'com.android.tools.build:gradle:8.6.0'
-        classpath 'com.google.gms:google-services:4.4.2'
-    }
 }
 
-// Do not add 'allprojects { repositories { ... } }' here. 
-// It is handled in settings.gradle now.
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
-task clean(type: Delete) {
+tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
