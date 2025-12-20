@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'widgets/team_list.dart'; // Import the widget we just made
+import 'widgets/team_list.dart'; 
 import 'widgets/leaderboard_dialog.dart';
 
 class InviteScreen extends StatefulWidget {
@@ -25,6 +25,7 @@ class _InviteScreenState extends State<InviteScreen> {
   Future<void> _loadInviteCode() async {
     final user = supabase.auth.currentUser;
     if (user != null) {
+      // Fetch invite code from 'users' table
       final data = await supabase.from('users').select('invite_code').eq('id', user.id).single();
       if (mounted) {
         setState(() {
@@ -80,7 +81,8 @@ class _InviteScreenState extends State<InviteScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFE94560).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE94560), style: BorderStyle.dashed),
+                        // FIXED: Changed dashed to solid to fix build error
+                        border: Border.all(color: const Color(0xFFE94560), style: BorderStyle.solid),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -114,7 +116,7 @@ class _InviteScreenState extends State<InviteScreen> {
             const SizedBox(height: 10),
             
             // --- TEAM LIST WIDGET ---
-            const TeamList(), // <--- Displays the list here
+            const TeamList(), 
           ],
         ),
       ),
