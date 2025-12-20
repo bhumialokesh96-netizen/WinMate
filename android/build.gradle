@@ -5,9 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Standard Android Tools
         classpath 'com.android.tools.build:gradle:7.3.0'
-        // Kotlin Support
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
