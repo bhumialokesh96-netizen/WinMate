@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/wallet/withdraw_screen.dart'; // Ensure this import exists
+import 'package:winmate/features/wallet/withdraw_screen.dart'; // Ensure path is correct
+import 'package:winmate/features/wallet/history_screen.dart';   // Ensure path is correct
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -27,19 +28,25 @@ class _HomeDashboardState extends State<HomeDashboard> {
     final user = supabase.auth.currentUser;
     if (user != null) {
       try {
-        final phone = user.userMetadata?['phone'] ?? "User";
+        // 1. Get Phone / Name
+        // We try to get the phone, if null we use Email or "Miner"
+        final phone = user.userMetadata?['phone'] ?? user.email ?? "Miner";
 
-        final walletData = await supabase
-            .from('wallet')
-            .select('balance, total_sms_sent')
-            .eq('user_id', user.id)
-            .single();
+        // 2. Get Wallet Balance from DB
+        // CHANGE 'wallet' -> 'users' AND 'user_id' -> 'id'
+final walletData = await supabase
+    .from('users')
+    .select('balance, total_sms_sent') // Make sure your column name is exactly total_sms_sent
+    .eq('id', user.id)
+    .single();
+
 
         if (mounted) {
           setState(() {
             userPhone = phone;
             balance = (walletData['balance'] as num).toDouble();
-            totalSms = walletData['total_sms_sent'] as int;
+            // If total_sms_sent is null, default to 0
+            totalSms = (walletData['total_sms_sent'] ?? 0) as int;
             isLoading = false;
           });
         }
@@ -65,7 +72,10 @@ class _HomeDashboardState extends State<HomeDashboard> {
           ],
         ),
         actions: [
-          IconButton(onPressed: _loadRealData, icon: const Icon(Icons.refresh, color: Colors.white))
+          IconButton(
+            onPressed: _loadRealData, 
+            icon: const Icon(Icons.refresh, color: Colors.white)
+          )
         ],
       ),
       body: isLoading 
@@ -110,9 +120,22 @@ class _HomeDashboardState extends State<HomeDashboard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildActionBtn(Icons.add, "Deposit"),
-                      _buildActionBtn(Icons.download, "Withdraw"),
-                      _buildActionBtn(Icons.history, "History"),
+                      // DEPOSIT
+                      _buildActionBtn(Icons.add, "Deposit", () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please contact Admin to Deposit funds."))
+                        );
+                      }),
+                      
+                      // WITHDRAW
+                      _buildActionBtn(Icons.download, "Withdraw", () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const WithdrawScreen()));
+                      }),
+
+                      // HISTORY
+                      _buildActionBtn(Icons.history, "History", () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
+                      }),
                     ],
                   ),
                 ],
@@ -121,26 +144,25 @@ class _HomeDashboardState extends State<HomeDashboard> {
     );
   }
 
-  // --- UPDATED BUTTON WITH NAVIGATION LOGIC ---
-  Widget _buildActionBtn(IconData icon, String label) {
+  // UPDATED WIDGET: Now accepts an 'onTap' function
+  Widget _buildActionBtn(IconData icon, String label, VoidCallback onTap) {
     return GestureDetector(
-      onTap: () {
-        if (label == "Withdraw") {
-          // Navigate to Withdraw Screen
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const WithdrawScreen()));
-        } else {
-          // Show "Coming Soon" for other buttons
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Coming Soon")));
-        }
-      },
+      onTap: onTap,
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(color: const Color(0xFF16213E), borderRadius: BorderRadius.circular(15)),
-            child: Icon(icon, color: Colors.white),
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              color: const Color(0xFF16213E), 
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5)
+              ]
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 8),
           Text(label, style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12))
         ],
       ),

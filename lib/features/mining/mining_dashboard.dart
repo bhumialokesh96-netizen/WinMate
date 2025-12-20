@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:lottie/lottie.dart';
-// Note: We removed the import for sim_selector.dart because it is defined below!
+// import 'package:lottie/lottie.dart'; // We don't need this anymore since we removed the animation
 
 class MiningDashboard extends StatefulWidget {
   const MiningDashboard({super.key});
@@ -40,7 +39,8 @@ class _MiningDashboardState extends State<MiningDashboard> {
     final user = supabase.auth.currentUser;
     if (user != null) {
       try {
-        final data = await supabase.from('wallet').select('balance').eq('user_id', user.id).single();
+        // CORRECTED: Targets 'users' table and 'id' column
+        final data = await supabase.from('users').select('balance').eq('id', user.id).single();
         if (mounted) setState(() => balance = (data['balance'] as num).toDouble());
       } catch (e) { }
     }
@@ -52,7 +52,6 @@ class _MiningDashboardState extends State<MiningDashboard> {
 
     try {
       if (!isMining) {
-        // PASS SELECTED SIM SLOT TO JAVA
         final String result = await platform.invokeMethod('START_MINING', {
           'userId': user.id,
           'simSlot': _selectedSimSlot, 
@@ -109,25 +108,29 @@ class _MiningDashboardState extends State<MiningDashboard> {
               ),
             ),
             
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-            // RADAR
-            SizedBox(
+            // --- RADAR (SAFE MODE - NO CRASH) ---
+            // Replaced the Lottie asset with this Container
+            Container(
               height: 200,
               width: 200,
-              child: isMining
-                  ? Lottie.asset('assets/animations/radar.json', fit: BoxFit.contain)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.wifi_tethering_off, size: 80, color: Colors.grey.withOpacity(0.3)),
-                        const SizedBox(height: 10),
-                        Text("Tap Start to Scan", style: GoogleFonts.poppins(color: Colors.grey)),
-                      ],
-                    ),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF16213E),
+                boxShadow: [
+                  if (isMining)
+                    BoxShadow(color: Colors.green.withOpacity(0.4), blurRadius: 30, spreadRadius: 5)
+                ],
+              ),
+              child: Icon(
+                Icons.wifi_tethering, // Uses a built-in Icon instead of a file
+                size: 100,
+                color: isMining ? Colors.green : Colors.grey,
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
             // BALANCE
             Text("Wallet Balance", style: GoogleFonts.poppins(color: Colors.grey)),
@@ -146,7 +149,6 @@ class _MiningDashboardState extends State<MiningDashboard> {
                 setState(() => _selectedSimSlot = slot);
               },
             ),
-            // ---------------------------
 
             const SizedBox(height: 30),
             
@@ -178,7 +180,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
 }
 
 // ---------------------------------------------------------
-// SIM SELECTOR WIDGET (Embedded here to fix Build Error)
+// SIM SELECTOR WIDGET
 // ---------------------------------------------------------
 class SimSelector extends StatelessWidget {
   final int selectedSlot;

@@ -39,8 +39,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-    # ASSETS REGISTRATION
-  assets:
-    - assets/animations/
+  # assets:
+    # - assests/animations/  # <--- Matches your misspelled folder
+
 
 
