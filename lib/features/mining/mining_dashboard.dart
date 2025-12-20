@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../services/native_bridge.dart';
 
 class MiningDashboard extends StatefulWidget {
   const MiningDashboard({super.key});
@@ -12,148 +13,243 @@ class MiningDashboard extends StatefulWidget {
 }
 
 class _MiningDashboardState extends State<MiningDashboard> {
-  bool _isMining = false;
-  int _selectedSim = 0; // 0 = SIM 1, 1 = SIM 2
+  static const platform = MethodChannel('com.smsindia.app/mining');
+  bool isMining = false;
+  int logsToday = 0;
+  double earnedToday = 0.0;
+  Timer? _uiTimer;
+  
+  final SupabaseClient supabase = Supabase.instance.client;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              // Header
-              const Text("SMS Miner Engine", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87)),
-              const Text("Turn your unused SMS into Cash", style: TextStyle(color: Colors.grey)),
-              
-              const SizedBox(height: 40),
-
-              // 1. THE RADAR ANIMATION
-              Container(
-                height: 250,
-                width: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 20, spreadRadius: 5)],
-                ),
-                child: _isMining 
-                  ? Lottie.asset('assets/animations/radar.json') // You need a Lottie file here later, or use Loading Spinner
-                  : const Icon(Icons.power_settings_new, size: 100, color: Colors.grey),
-              ),
-
-              const SizedBox(height: 40),
-
-              // 2. STATUS TEXT
-              Text(
-                _isMining ? "MINING ACTIVE..." : "MINING PAUSED",
-                style: TextStyle(
-                  fontSize: 22, 
-                  fontWeight: FontWeight.bold,
-                  color: _isMining ? Colors.green : Colors.redAccent
-                ),
-              ),
-              
-              const Spacer(),
-
-              // 3. SIM SELECTOR
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(30)),
-                child: Row(
-                  children: [
-                    _simOption("SIM 1", 0),
-                    _simOption("SIM 2", 1),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 4. BIG START BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 60,
-                child: ElevatedButton(
-                  onPressed: _toggleMining,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isMining ? Colors.redAccent : const Color(0xFF4CAF50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    elevation: 5,
-                  ),
-                  child: Text(
-                    _isMining ? "STOP MINING" : "START MINING",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _checkMiningStatus();
+    _loadDailyStats();
   }
 
-  Widget _simOption(String label, int index) {
-    bool isSelected = _selectedSim == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: _isMining ? null : () => setState(() => _selectedSim = index), // Disable changing SIM while mining
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: isSelected ? [BoxShadow(color: Colors.black12, blurRadius: 4)] : [],
-          ),
-          child: Center(
-            child: Text(
-              label, 
-              style: TextStyle(
-                fontWeight: FontWeight.bold, 
-                color: isSelected ? Colors.black : Colors.grey[600]
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _uiTimer?.cancel();
+    super.dispose();
   }
 
-  // LOGIC TO START/STOP
-  void _toggleMining() async {
-    if (_isMining) {
-      // STOP
-      await NativeBridge.stopMiningService();
-      setState(() => _isMining = false);
-    } else {
-      // START
-      // A. Ask Permissions First
-      if (await _requestPermissions()) {
-        final userId = Supabase.instance.client.auth.currentUser!.id;
-        
-        await NativeBridge.startMiningService(userId, _selectedSim);
-        setState(() => _isMining = true);
-        
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mining Started! App will work in background."), backgroundColor: Colors.green));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Permissions Denied! Cannot Mine."), backgroundColor: Colors.red));
+  // 1. Check if Service is already running
+  Future<void> _checkMiningStatus() async {
+    try {
+      final bool active = await platform.invokeMethod('isServiceRunning');
+      setState(() {
+        isMining = active;
+      });
+      if (active) {
+        _startUiTicker();
+      }
+    } catch (e) {
+      print("Error checking status: $e");
+    }
+  }
+
+  // 2. Load Stats from Supabase
+  Future<void> _loadDailyStats() async {
+    final user = supabase.auth.currentUser;
+    if (user != null) {
+      // Get logs created today
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      final response = await supabase
+          .from('mining_logs')
+          .select()
+          .eq('user_id', user.id)
+          .gte('created_at', today); // Filter by date (approx)
+      
+      if (response != null) {
+        final List data = response as List;
+        setState(() {
+          logsToday = data.length;
+          earnedToday = logsToday * 2.0; // ₹2.0 per log
+        });
       }
     }
   }
 
-  Future<bool> _requestPermissions() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.sms,
-      Permission.phone,
-      Permission.notification,
-    ].request();
+  // 3. Start/Stop Mining Logic
+  Future<void> _toggleMining() async {
+    if (isMining) {
+      // STOP
+      await platform.invokeMethod('stopMining');
+      setState(() => isMining = false);
+      _uiTimer?.cancel();
+    } else {
+      // START
+      if (await Permission.sms.request().isGranted) {
+        await platform.invokeMethod('startMining');
+        setState(() => isMining = true);
+        _startUiTicker();
+        _simulateMiningForDemo(); // TEMPORARY: Triggers DB update for testing
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("SMS Permission Required")));
+      }
+    }
+  }
 
-    return statuses[Permission.sms]!.isGranted && statuses[Permission.phone]!.isGranted;
+  // --- CRITICAL: THE MONEY MAKER ---
+  // Since we can't easily call Supabase from background Java yet,
+  // We will simulate the DB update here for the demo.
+  // In Phase 7, we connect the Native Service callback.
+  void _simulateMiningForDemo() {
+    _uiTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
+      if (!isMining) {
+        timer.cancel();
+        return;
+      }
+      
+      final user = supabase.auth.currentUser;
+      if (user != null) {
+        // INSERT LOG -> TRIGGERS SQL -> UPDATES WALLET
+        await supabase.from('mining_logs').insert({
+          'user_id': user.id,
+          'sms_count': 1,
+          'earned_amount': 2.00, // ₹2.00
+        });
+        
+        // Refresh UI
+        _loadDailyStats();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(
+             content: Text("SMS Sent! ₹2.00 Added"), 
+             duration: Duration(milliseconds: 1000),
+             backgroundColor: Colors.green,
+           )
+        );
+      }
+    });
+  }
+
+  void _startUiTicker() {
+    // Just updates the UI stats periodically
+    _uiTimer?.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        title: Text("Mining Node", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            // --- STATUS CARD ---
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isMining ? const Color(0xFF16213E) : const Color(0xFF252525),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isMining ? Colors.green : Colors.white10,
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    isMining ? Icons.wifi_tethering : Icons.wifi_off,
+                    size: 60,
+                    color: isMining ? Colors.green : Colors.grey,
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    isMining ? "MINING ACTIVE" : "MINING PAUSED",
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isMining ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                  Text(
+                    isMining ? "Processing transactions..." : "Tap button to start",
+                    style: GoogleFonts.poppins(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // --- STATS GRID ---
+            Row(
+              children: [
+                Expanded(child: _buildStatCard("SMS Sent", "$logsToday", Icons.message, Colors.blue)),
+                const SizedBox(width: 15),
+                Expanded(child: _buildStatCard("Earned Today", "₹${earnedToday.toStringAsFixed(0)}", Icons.attach_money, Colors.orange)),
+              ],
+            ),
+
+            const Spacer(),
+
+            // --- BIG BUTTON ---
+            GestureDetector(
+              onTap: _toggleMining,
+              child: Container(
+                height: 80,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isMining 
+                      ? [Colors.redAccent, Colors.red] 
+                      : [const Color(0xFFE94560), const Color(0xFF0F3460)],
+                  ),
+                  borderRadius: BorderRadius.circular(40),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isMining ? Colors.red : const Color(0xFFE94560)).withOpacity(0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    isMining ? "STOP MINING" : "START MINING",
+                    style: GoogleFonts.poppins(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF16213E),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 10),
+          Text(value, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text(title, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white54)),
+        ],
+      ),
+    );
   }
 }
