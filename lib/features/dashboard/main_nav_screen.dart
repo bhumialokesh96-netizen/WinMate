@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:winmate/features/home/home_dashboard.dart';
 import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
+import 'package:winmate/features/profile/profile_screen.dart';
+
 
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
@@ -16,11 +18,12 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
   // --- THE SCREENS LIST ---
   final List<Widget> _screens = [
-    const HomeDashboard(),   // Index 0
-    const MiningDashboard(), // Index 1
-    const InviteScreen(),    // Index 2
-    const Center(child: Text("Profile (Coming Phase 6)", style: TextStyle(color: Colors.white))), // Index 3
-  ];
+  const HomeDashboard(),   
+  const MiningDashboard(), 
+  const InviteScreen(),    
+  const ProfileScreen(), // <--- REPLACE THE PLACEHOLDER HERE
+];
+
 
   @override
   Widget build(BuildContext context) {
