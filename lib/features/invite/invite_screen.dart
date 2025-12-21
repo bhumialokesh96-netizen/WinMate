@@ -15,9 +15,10 @@ class InviteScreen extends StatefulWidget {
 }
 
 class _InviteScreenState extends State<InviteScreen> {
+  // --- LOGIC STARTS HERE (UNCHANGED) ---
   final SupabaseClient supabase = Supabase.instance.client;
   String myInviteCode = "Loading...";
-  String shareUrl = "http://api.smsindia.cfd";
+  String shareUrl = "http://api.winmate.cfd";
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _InviteScreenState extends State<InviteScreen> {
   void _copyCode() {
     Clipboard.setData(ClipboardData(text: myInviteCode));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Code Copied! Paste it to friends."), backgroundColor: Colors.green),
+      const SnackBar(content: Text("Code Copied!"), backgroundColor: Colors.green),
     );
   }
 
@@ -58,175 +59,264 @@ class _InviteScreenState extends State<InviteScreen> {
 
   void _shareInvite() {
     if (myInviteCode == "Loading..." || myInviteCode == "ERROR") return;
-    
-    // The Professional Share Message
     String message = "🔥 *Earn ₹500 Daily with WinMate!*\n\n"
         "Download the app and use my code: *$myInviteCode*\n"
         "Click here: $shareUrl?ref=$myInviteCode";
-        
     Share.share(message);
   }
+  // --- LOGIC ENDS HERE ---
 
+  // --- NEW GREEN UI ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      // No background color here because we use a container below
+      extendBodyBehindAppBar: true, 
       appBar: AppBar(
-        title: Text("Refer & Earn", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: _build3DTitle("Refer & Earn"), // Custom 3D Text
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.leaderboard, color: Colors.orange),
+            icon: const Icon(Icons.leaderboard, color: Colors.yellow, size: 30),
             onPressed: () => showDialog(context: context, builder: (_) => const LeaderboardDialog()),
           )
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // --- 1. GAMIFIED HEADER CARD ---
-            Container(
-              margin: const EdgeInsets.all(20),
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF8C00), Color(0xFFFF3D00)], // Orange Gradient
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          // 1. GREEN BACKGROUND (Gradient)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF00E676), // Bright Green Top
+                  Color(0xFF00C853), // Medium Green
+                  Color(0xFF00BFA5), // Teal Bottom
+                ],
+              ),
+            ),
+          ),
+
+          // 2. PATTERN OVERLAY (Optional - Hexagons)
+          Opacity(
+            opacity: 0.1,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage("https://www.transparenttextures.com/patterns/cubes.png"),
+                  repeat: ImageRepeat.repeat,
                 ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.orange.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
-              ),
-              child: Column(
-                children: [
-                  const Icon(Icons.stars, size: 50, color: Colors.white),
-                  const SizedBox(height: 10),
-                  Text("Invite Friends & Earn", style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                  Text("Get ₹30 + 10% Commission", style: GoogleFonts.poppins(fontSize: 14, color: Colors.white.withOpacity(0.9))),
-                ],
               ),
             ),
+          ),
 
-            // --- 2. QR CODE & CODE BOX ---
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF16213E),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE94560), width: 1),
-              ),
+          // 3. MAIN CONTENT
+          SafeArea(
+            child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // QR Code
+                  // --- ORANGE PROMO CARD ---
                   Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                    child: QrImageView(
-                      data: "$shareUrl?ref=$myInviteCode",
-                      version: QrVersions.auto,
-                      size: 140.0,
+                    margin: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF9100), Color(0xFFFF3D00)], // Orange Gradient
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFFE082), width: 2), // Yellow Border
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.stars, size: 50, color: Colors.white),
+                        const SizedBox(height: 10),
+                        Text("Invite Friends & Earn", 
+                          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, shadows: [const Shadow(color: Colors.black26, blurRadius: 4)])
+                        ),
+                        Text("Get ₹30 + 10% Commission", 
+                          style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  
-                  // Code Display
-                  Text("Your Referral Code", style: GoogleFonts.poppins(color: Colors.grey)),
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: _copyCode,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A2E),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white24),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            myInviteCode, 
-                            style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 3)
+
+                  // --- QR CODE & CODE BOX (White Background like screenshot) ---
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95), // Slightly transparent white
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                    ),
+                    child: Column(
+                      children: [
+                        // QR Code
+                        QrImageView(
+                          data: "$shareUrl?ref=$myInviteCode",
+                          version: QrVersions.auto,
+                          size: 140.0,
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Code Display
+                        Text("Your Referral Code", style: GoogleFonts.poppins(color: Colors.grey[700], fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: _copyCode,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E9), // Very light green
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFF00C853)), // Green Border
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  myInviteCode, 
+                                  style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF00C853), letterSpacing: 3)
+                                ),
+                                const SizedBox(width: 15),
+                                const Icon(Icons.copy, color: Color(0xFF00C853)),
+                              ],
+                            ),
                           ),
-                          const SizedBox(width: 15),
-                          const Icon(Icons.copy, color: Color(0xFFE94560)),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
+
+                  const SizedBox(height: 25),
+
+                  // --- BIG ACTION BUTTONS (3D Style) ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Row(
+                      children: [
+                        // Copy Link Button
+                        Expanded(
+                          child: Container(
+                            height: 55,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.white,
+                              boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))],
+                            ),
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: _copyLink,
+                              icon: const Icon(Icons.link, color: Colors.black87),
+                              label: const Text("Copy Link", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        // Invite Button (Orange 3D)
+                        Expanded(
+                          child: Container(
+                            height: 55,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(colors: [Color(0xFFFF9100), Color(0xFFFF3D00)]),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [BoxShadow(color: Colors.black26, offset: Offset(0, 4))],
+                            ),
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              ),
+                              onPressed: _shareInvite,
+                              icon: const Icon(Icons.share, color: Colors.white),
+                              label: const Text("INVITE NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // --- TEAM LIST HEADER ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.group_add, color: Colors.white, size: 28),
+                        const SizedBox(width: 10),
+                        // Using the 3D Text Helper
+                        _build3DTitle("My Team"),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+                          child: Text("10% Comm.", style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF00C853))),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // --- TEAM LIST (Pass a color parameter if your TeamList supports it, otherwise it will just sit on green) ---
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: TeamList(),
+                  ),
+                  
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
-
-            const SizedBox(height: 25),
-
-            // --- 3. BIG ACTION BUTTONS ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: _copyLink,
-                      icon: const Icon(Icons.link, color: Colors.white),
-                      label: const Text("Copy Link", style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green, // WhatsApp style
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: _shareInvite,
-                      icon: const Icon(Icons.share, color: Colors.white),
-                      label: const Text("INVITE NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // --- 4. TEAM LIST HEADER ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Row(
-                children: [
-                  const Icon(Icons.group_add, color: Color(0xFFE94560)),
-                  const SizedBox(width: 10),
-                  Text("My Team", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                  const Spacer(),
-                  Text("10% Commission", style: GoogleFonts.poppins(fontSize: 12, color: Colors.greenAccent)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // --- 5. YOUR TEAM LIST WIDGET ---
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: TeamList(),
-            ),
-            
-            const SizedBox(height: 30),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+
+  // --- HELPER: 3D TEXT STYLE ---
+  Widget _build3DTitle(String text) {
+    return Stack(
+      children: [
+        // Shadow
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF004D40), // Dark Green Shadow
+          ),
+        ),
+        // Main Text
+        Transform.translate(
+          offset: const Offset(0, -2),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFFFFEB3B), // Yellow
+              shadows: [const Shadow(color: Colors.black12, blurRadius: 2)]
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
