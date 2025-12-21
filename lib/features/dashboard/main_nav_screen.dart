@@ -5,7 +5,8 @@ import 'package:winmate/features/auth/login_screen.dart';
 import 'package:winmate/features/home/home_dashboard.dart';
 import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
-import 'package:winmate/services/notification_screen.dart';
+// CORRECT PATH
+import 'package:winmate/features/system/notification_screen.dart'; 
 // NOTE: No import for profile_screen here because we define it below!
 
 // ---------------------------------------------------------
