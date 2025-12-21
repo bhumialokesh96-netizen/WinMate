@@ -5,6 +5,7 @@ import 'package:winmate/features/auth/login_screen.dart';
 import 'package:winmate/features/home/home_dashboard.dart';
 import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
+import 'package:winmate/services/notification_screen.dart';
 // NOTE: No import for profile_screen here because we define it below!
 
 // ---------------------------------------------------------
@@ -55,7 +56,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
 // ---------------------------------------------------------
 // 2. PROFILE SCREEN (Embedded to fix Build Error)
 // ---------------------------------------------------------
-class ProfileScreen extends StatefulWidget {
+
+ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
@@ -79,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() {
           phone = user.userMetadata?['phone'] ?? user.phone ?? "Unknown";
+          // Just taking first 8 chars for display
           userId = user.id.substring(0, 8).toUpperCase();
         });
       }
@@ -88,10 +91,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     await supabase.auth.signOut();
     if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (route) => false,
-      );
+      // Navigate back to Login (Make sure LoginScreen is imported)
+      // Navigator.of(context).pushAndRemoveUntil(...) 
     }
   }
 
@@ -122,6 +123,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text("ID: $userId", style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey)),
             const SizedBox(height: 30),
             
+            // --- NEW: SYSTEM NOTIFICATION BUTTON ---
+            _buildMenuItem(Icons.notifications_active, "System Notifications", () {
+               Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationScreen()));
+            }),
+
             _buildMenuItem(Icons.security, "Security", () {}),
             _buildMenuItem(Icons.help_outline, "Help & Support", () {}),
             _buildMenuItem(Icons.logout, "Logout", _logout, isRed: true),
