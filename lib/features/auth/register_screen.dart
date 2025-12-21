@@ -16,31 +16,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _referralController = TextEditingController();
+  // 1. Set Default Company Code here
+  final _referralController = TextEditingController(text: "666666"); 
+  
   bool isLoading = false;
 
   Future<void> _signUp() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
+    // 2. Added check for Referral Controller and Phone
+    if (_emailController.text.isEmpty || 
+        _passwordController.text.isEmpty || 
+        _phoneController.text.isEmpty ||
+        _referralController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("All fields including Referral Code are required!"), 
+          backgroundColor: Colors.red
+        )
+      );
       return;
     }
 
     setState(() => isLoading = true);
     
     try {
-      // 1. Sign Up (Supabase sends OTP automatically if Email Confirm is on)
       await supabase.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         data: {
           'phone': _phoneController.text.trim(),
-          'referred_by': _referralController.text.trim(),
+          'referred_by': _referralController.text.trim(), // Sends 666666 or user code
         },
       );
 
       if (mounted) {
         setState(() => isLoading = false);
-        // 2. Show OTP Dialog
         _showOtpDialog(_emailController.text.trim());
       }
 
@@ -59,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final otpController = TextEditingController();
     showDialog(
       context: context,
-      barrierDismissible: false, // Force user to enter OTP
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF16213E),
         title: Text("Verify Email", style: GoogleFonts.poppins(color: Colors.white)),
@@ -85,14 +94,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel
+            onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE94560)),
             onPressed: () async {
               try {
-                // 3. Verify OTP
                 final res = await supabase.auth.verifyOTP(
                   type: OtpType.signup,
                   token: otpController.text.trim(),
@@ -100,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 );
                 
                 if (res.session != null && context.mounted) {
-                  Navigator.pop(context); // Close Dialog
+                  Navigator.pop(context);
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavScreen()));
                 }
               } catch (e) {
@@ -135,7 +143,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 15),
               _buildTextField(_passwordController, "Password", Icons.lock, TextInputType.text, isPassword: true),
               const SizedBox(height: 15),
-              _buildTextField(_referralController, "Referral Code (Optional)", Icons.group_add, TextInputType.text),
+              // 3. Updated Label (Removed 'Optional')
+              _buildTextField(_referralController, "Referral Code", Icons.group_add, TextInputType.text),
               const SizedBox(height: 25),
 
               SizedBox(
@@ -151,7 +160,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 20),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const LoginScreen())
+                  );
+                },
                 child: Text("Already have an account? Login", style: GoogleFonts.poppins(color: Colors.white70)),
               )
             ],
