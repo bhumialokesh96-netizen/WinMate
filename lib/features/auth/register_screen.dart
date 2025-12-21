@@ -12,28 +12,33 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController(); // Only Phone needed
   final _passwordController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _referralController = TextEditingController(); // <--- NEW CONTROLLER
+  final _referralController = TextEditingController();
   bool isLoading = false;
 
   Future<void> _signUp() async {
+    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
+      return;
+    }
+
     setState(() => isLoading = true);
     
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
     final phone = _phoneController.text.trim();
-    final referral = _referralController.text.trim(); // <--- GET CODE
+    final password = _passwordController.text.trim();
+    final referral = _referralController.text.trim();
+
+    // TRICK: Create a fake email using the phone number
+    final fakeEmail = "$phone@winmate.com"; 
 
     try {
-      // 1. Sign up with Metadata
       final AuthResponse res = await supabase.auth.signUp(
-        email: email,
+        email: fakeEmail,
         password: password,
         data: {
-          'phone': phone,
-          'referred_by': referral.isNotEmpty ? referral : null, // <--- PASS TO DB
+          'phone': phone, // This goes to the SQL Trigger
+          'referred_by': referral.isNotEmpty ? referral : null,
         },
       );
 
@@ -46,9 +51,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString().split('\n')[0]}"), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -69,23 +76,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text("Create Account", style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
 
-              // PHONE
-              _buildTextField(_phoneController, "Phone Number", Icons.phone),
-              const SizedBox(height: 15),
-
-              // EMAIL
-              _buildTextField(_emailController, "Email Address", Icons.email),
+              // PHONE (User sees this)
+              _buildTextField(_phoneController, "Phone Number", Icons.phone, TextInputType.phone),
               const SizedBox(height: 15),
 
               // PASSWORD
-              _buildTextField(_passwordController, "Password", Icons.lock, isPassword: true),
+              _buildTextField(_passwordController, "Password", Icons.lock, TextInputType.text, isPassword: true),
               const SizedBox(height: 15),
 
-              // REFERRAL CODE (NEW)
-              _buildTextField(_referralController, "Referral Code (Optional)", Icons.group_add),
+              // REFERRAL
+              _buildTextField(_referralController, "Referral Code (Optional)", Icons.group_add, TextInputType.text),
               const SizedBox(height: 25),
 
-              // BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -97,12 +99,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     : Text("REGISTER", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
-              
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("Already have an account? Login", style: GoogleFonts.poppins(color: Colors.white70)),
-              )
             ],
           ),
         ),
@@ -110,10 +106,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, IconData icon, {bool isPassword = false}) {
+  Widget _buildTextField(TextEditingController controller, String hint, IconData icon, TextInputType type, {bool isPassword = false}) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
+      keyboardType: type,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.white54),

@@ -89,13 +89,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _logout() async {
+    Future<void> _logout() async {
+    // 1. Sign out from Supabase
     await supabase.auth.signOut();
+    
+    // 2. Navigate to Login Screen
     if (mounted) {
-      // Navigate back to Login (Make sure LoginScreen is imported)
-      // Navigator.of(context).pushAndRemoveUntil(...) 
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginScreen()), 
+        (route) => false, // This prevents the user from pressing "Back" to return
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
