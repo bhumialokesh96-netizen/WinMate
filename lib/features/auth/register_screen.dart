@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:winmate/features/auth/login_screen.dart';
 import 'package:winmate/features/dashboard/main_nav_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -12,53 +13,105 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
-  final _phoneController = TextEditingController(); // Only Phone needed
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _referralController = TextEditingController();
   bool isLoading = false;
 
   Future<void> _signUp() async {
-    if (_phoneController.text.isEmpty || _passwordController.text.isEmpty) {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
 
     setState(() => isLoading = true);
     
-    final phone = _phoneController.text.trim();
-    final password = _passwordController.text.trim();
-    final referral = _referralController.text.trim();
-
-    // TRICK: Create a fake email using the phone number
-    final fakeEmail = "$phone@winmate.com"; 
-
     try {
-      final AuthResponse res = await supabase.auth.signUp(
-        email: fakeEmail,
-        password: password,
+      // 1. Sign Up (Supabase sends OTP automatically if Email Confirm is on)
+      await supabase.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
         data: {
-          'phone': phone, // This goes to the SQL Trigger
-          'referred_by': referral.isNotEmpty ? referral : null,
+          'phone': _phoneController.text.trim(),
+          'referred_by': _referralController.text.trim(),
         },
       );
 
-      if (res.user != null) {
-        if (mounted) {
-           Navigator.pushReplacement(
-            context, 
-            MaterialPageRoute(builder: (_) => const MainNavScreen())
-          );
-        }
+      if (mounted) {
+        setState(() => isLoading = false);
+        // 2. Show OTP Dialog
+        _showOtpDialog(_emailController.text.trim());
       }
+
     } catch (e) {
       if (mounted) {
+        setState(() => isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${e.toString().split('\n')[0]}"), backgroundColor: Colors.red),
         );
       }
-    } finally {
-      if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  // --- OTP DIALOG ---
+  void _showOtpDialog(String email) {
+    final otpController = TextEditingController();
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Force user to enter OTP
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF16213E),
+        title: Text("Verify Email", style: GoogleFonts.poppins(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Enter the 6-digit code sent to\n$email", style: const TextStyle(color: Colors.white70), textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            TextField(
+              controller: otpController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 5),
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                counterText: "",
+                filled: true,
+                fillColor: Colors.black26,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Cancel
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE94560)),
+            onPressed: () async {
+              try {
+                // 3. Verify OTP
+                final res = await supabase.auth.verifyOTP(
+                  type: OtpType.signup,
+                  token: otpController.text.trim(),
+                  email: email,
+                );
+                
+                if (res.session != null && context.mounted) {
+                  Navigator.pop(context); // Close Dialog
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavScreen()));
+                }
+              } catch (e) {
+                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Invalid Code"), backgroundColor: Colors.red));
+              }
+            },
+            child: const Text("Verify", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -76,15 +129,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text("Create Account", style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 30),
 
-              // PHONE (User sees this)
               _buildTextField(_phoneController, "Phone Number", Icons.phone, TextInputType.phone),
               const SizedBox(height: 15),
-
-              // PASSWORD
+              _buildTextField(_emailController, "Email Address", Icons.email, TextInputType.emailAddress),
+              const SizedBox(height: 15),
               _buildTextField(_passwordController, "Password", Icons.lock, TextInputType.text, isPassword: true),
               const SizedBox(height: 15),
-
-              // REFERRAL
               _buildTextField(_referralController, "Referral Code (Optional)", Icons.group_add, TextInputType.text),
               const SizedBox(height: 25),
 
@@ -99,6 +149,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     : Text("REGISTER", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Already have an account? Login", style: GoogleFonts.poppins(color: Colors.white70)),
+              )
             ],
           ),
         ),
