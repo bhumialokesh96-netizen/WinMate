@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:winmate/features/dashboard/main_nav_screen.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart'; // <--- 1. Import this
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -102,62 +103,76 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Welcome Back!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFFE94560))),
-              const SizedBox(height: 40),
-              
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: "Email Address",
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  prefixIcon: const Icon(Icons.email, color: Colors.white54),
-                  filled: true,
-                  fillColor: const Color(0xFF16213E),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              
-              TextField(
-                controller: _passController,
-                obscureText: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  labelStyle: const TextStyle(color: Colors.grey),
-                  prefixIcon: const Icon(Icons.lock, color: Colors.white54),
-                  filled: true,
-                  fillColor: const Color(0xFF16213E),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 30),
-              
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE94560), 
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: SingleChildScrollView( // Added SingleChildScrollView to prevent overflow
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 50), // Spacing from top
+                const Text("Welcome Back!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFFE94560))),
+                const SizedBox(height: 40),
+                
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Email Address",
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.email, color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF16213E),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: _isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("LOGIN", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                child: const Text("Don't have an account? Register", style: TextStyle(color: Colors.green)),
-              )
-            ],
+                const SizedBox(height: 16),
+                
+                TextField(
+                  controller: _passController,
+                  obscureText: true,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    labelStyle: const TextStyle(color: Colors.grey),
+                    prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                    filled: true,
+                    fillColor: const Color(0xFF16213E),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                
+                // --- 2. ADDED FORGOT PASSWORD BUTTON HERE ---
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+                    child: const Text("Forgot Password?", style: TextStyle(color: Colors.grey)),
+                  ),
+                ),
+                // ---------------------------------------------
+            
+                const SizedBox(height: 20),
+                
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE94560), 
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: _isLoading 
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("LOGIN", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                  child: const Text("Don't have an account? Register", style: TextStyle(color: Colors.green)),
+                )
+              ],
+            ),
           ),
         ),
       ),
