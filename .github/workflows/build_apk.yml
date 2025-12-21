@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Signed Release APK
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout
+    # 1. Checkout Code
     - uses: actions/checkout@v3
 
     # 2. Setup Java
@@ -34,13 +34,22 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    # 5. Build Universal APK (Works on ALL Androids)
-    - name: Build APK
-      run: flutter build apk --debug
+    # 5. Decode Keystore (This creates the file android/app/upload-keystore.jks)
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > android/app/my-release-key.jks
 
-    # 6. Upload APK
-    - name: Upload APK
+    # 6. Build Signed Release APK
+    - name: Build Signed APK
+      run: flutter build apk --release
+      env:
+        SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+        SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+    # 7. Upload the Signed APK
+    - name: Upload Signed APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-universal-debug
-        path: build/app/outputs/flutter-apk/app-debug.apk
+        name: app-release-signed
+        path: build/app/outputs/flutter-apk/app-release.apk

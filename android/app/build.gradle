@@ -23,11 +23,10 @@ if (flutterVersionName == null) {
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-// THIS IS THE STABLE CONNECTION LINE:
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    namespace "com.smsindia.app" // Must match your package
+    namespace "com.smsindia.app"
     compileSdkVersion 34
     ndkVersion "25.1.8937393"
 
@@ -52,9 +51,27 @@ android {
         versionName flutterVersionName
     }
 
+    // 👇 THIS IS THE NEW PART FOR SIGNING 👇
+    signingConfigs {
+        release {
+            // It looks for the file created by GitHub Actions
+            storeFile file("my-release-key.jks")
+            // Reads secrets passed from GitHub Actions
+            storePassword System.getenv("SIGNING_STORE_PASSWORD")
+            keyAlias System.getenv("SIGNING_KEY_ALIAS")
+            keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            // 👇 TELLS ANDROID TO USE THE SIGNING CONFIG ABOVE
+            signingConfig signingConfigs.release
+            
+            // Optional: Shrinks code to make APK smaller
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -67,4 +84,3 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 }
-
