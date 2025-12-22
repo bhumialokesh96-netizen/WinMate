@@ -81,98 +81,92 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 
   Future<void> _submitWithdrawal() async {
-    final amount = double.tryParse(_amountController.text);
-    final upi = _upiController.text.trim();
+  final amount = double.tryParse(_amountController.text);
+  final upi = _upiController.text.trim();
+  final user = supabase.auth.currentUser;
 
-    if (amount == null || amount < 100) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: build3DText(
-            "Minimum withdrawal is ₹100",
-            fontSize: 14,
-            mainColor: Colors.white,
-            shadowColor: Colors.black54,
-          ),
-          backgroundColor: Colors.orange,
-        )
-      );
-      return;
-    }
-
-    if (amount > userBalance) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          content: build3DText(
-            "Insufficient funds. Your balance is ₹${userBalance.toStringAsFixed(2)}",
-            fontSize: 14,
-            mainColor: Colors.white,
-            shadowColor: Colors.black54,
-          ),
-        )
-      );
-      return;
-    }
-
-    if (upi.isEmpty || !upi.contains('@')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: build3DText(
-            "Invalid UPI ID",
-            fontSize: 14,
-            mainColor: Colors.white,
-            shadowColor: Colors.black54,
-          ),
-          backgroundColor: Colors.orange,
-        )
-      );
-      return;
-    }
-
-    setState(() => isLoading = true);
-
-    try {
-      final user = supabase.auth.currentUser;
-      if (user != null) {
-        await supabase.from('withdrawals').insert({
-          'user_id': user.id,
-          'amount': amount,
-          'upi_id': upi,
-          'status': 'pending'
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: primaryGreen,
-            content: build3DText(
-              "Withdrawal Requested Successfully!",
-              fontSize: 14,
-              mainColor: Colors.white,
-              shadowColor: Colors.black54,
-            ),
-          )
-        );
-        _amountController.clear();
-        _upiController.clear();
-        await _loadUserBalance(); // Refresh balance
-        await _loadHistory(); // Refresh list
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.red,
-          content: build3DText(
-            "Error: ${e.toString().contains('Insufficient') ? 'Insufficient Funds' : 'Request Failed'}",
-            fontSize: 14,
-            mainColor: Colors.white,
-            shadowColor: Colors.black54,
-          ),
-        )
-      );
-    } finally {
-      setState(() => isLoading = false);
-    }
+  // Validations (keep existing validation code)
+  if (amount == null || amount < 100) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: build3DText("Minimum withdrawal is ₹100"),
+        backgroundColor: Colors.orange,
+      )
+    );
+    return;
   }
+
+  if (amount > userBalance) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: build3DText("Insufficient funds. Your balance is ₹${userBalance.toStringAsFixed(2)}"),
+      )
+    );
+    return;
+  }
+
+  if (upi.isEmpty || !upi.contains('@')) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: build3DText("Invalid UPI ID"),
+        backgroundColor: Colors.orange,
+      )
+    );
+    return;
+  }
+
+  setState(() => isLoading = true);
+
+  try {
+    if (user != null) {
+      // 1. First update the user's balance
+      final newBalance = userBalance - amount;
+      await supabase
+          .from('users')
+          .update({'balance': newBalance})
+          .eq('id', user.id);
+
+      // 2. Then create the withdrawal record
+      await supabase.from('withdrawals').insert({
+        'user_id': user.id,
+        'amount': amount,
+        'upi_id': upi,
+        'status': 'pending'
+      });
+
+      // 3. Update local state
+      setState(() {
+        userBalance = newBalance;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: primaryGreen,
+          content: build3DText("Withdrawal Requested Successfully!"),
+        )
+      );
+      
+      _amountController.clear();
+      _upiController.clear();
+      await _loadHistory(); // Refresh list only (balance already updated)
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: build3DText(
+          "Error: ${e.toString().contains('Insufficient') ? 'Transaction Failed' : 'Request Failed'}",
+        ),
+      )
+    );
+    // Reload balance in case update failed
+    await _loadUserBalance();
+  } finally {
+    setState(() => isLoading = false);
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {

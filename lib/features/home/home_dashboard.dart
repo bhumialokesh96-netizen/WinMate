@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:winmate/features/wallet/withdraw_screen.dart';
 import 'package:winmate/features/wallet/history_screen.dart';
+import 'package:winmate/features/home/widgets/lucky_wheel.dart'; // Add this import
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -106,187 +107,336 @@ class _HomeDashboardState extends State<HomeDashboard> {
                 ? const Center(
                     child: CircularProgressIndicator(color: Colors.white),
                   )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        // AppBar with User Info
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  build3DText(
-                                    "Welcome,",
-                                    fontSize: 18,
-                                    mainColor: Colors.yellow,
-                                    shadowColor: const Color(0xFF004D40),
-                                    depth: 2,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  build3DText(
-                                    userPhone,
-                                    fontSize: 16,
-                                    mainColor: Colors.white,
-                                    shadowColor: Colors.black54,
-                                    depth: 1.5,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() => _isRefreshing = true);
-                                _loadRealData();
-                              },
-                              icon: _isRefreshing
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : build3DIcon(
-                                      Icons.refresh,
-                                      size: 28,
-                                      mainColor: Colors.white,
-                                      shadowColor: Colors.black54,
-                                    ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        // --- BALANCE CARD ---
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(25),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryGreen.withOpacity(0.3),
-                                blurRadius: 15,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
+                : RefreshIndicator(
+                    onRefresh: _loadRealData,
+                    color: primaryGreen,
+                    backgroundColor: Colors.white,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          // AppBar with User Info
+                          Row(
                             children: [
-                              build3DText(
-                                "Current Balance",
-                                fontSize: 14,
-                                mainColor: Colors.white.withOpacity(0.9),
-                                shadowColor: Colors.black54,
-                                depth: 1.5,
-                              ),
-                              const SizedBox(height: 10),
-                              build3DText(
-                                "₹${balance.toStringAsFixed(2)}",
-                                fontSize: 42,
-                                mainColor: Colors.white,
-                                shadowColor: Colors.black,
-                                depth: 3,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              const SizedBox(height: 15),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 15, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    build3DIcon(
-                                      Icons.send,
-                                      size: 16,
-                                      mainColor: Colors.white,
-                                      shadowColor: Colors.black54,
-                                    ),
-                                    const SizedBox(width: 5),
                                     build3DText(
-                                      "Total SMS Sent: $totalSms",
-                                      fontSize: 13,
+                                      "Welcome,",
+                                      fontSize: 18,
+                                      mainColor: Colors.yellow,
+                                      shadowColor: const Color(0xFF004D40),
+                                      depth: 2,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    build3DText(
+                                      userPhone,
+                                      fontSize: 16,
                                       mainColor: Colors.white,
                                       shadowColor: Colors.black54,
-                                      depth: 1,
+                                      depth: 1.5,
                                     ),
                                   ],
                                 ),
                               ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() => _isRefreshing = true);
+                                  _loadRealData();
+                                },
+                                icon: _isRefreshing
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : build3DIcon(
+                                        Icons.refresh,
+                                        size: 28,
+                                        mainColor: Colors.white,
+                                        shadowColor: Colors.black54,
+                                      ),
+                              ),
                             ],
                           ),
-                        ),
 
-                        const SizedBox(height: 40),
+                          const SizedBox(height: 30),
 
-                        // --- ACTIONS ---
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            // DEPOSIT
-                            _buildActionBtn(
-                              Icons.add,
-                              "Deposit",
-                              () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: build3DText(
-                                      "Please contact Admin to Deposit funds.",
-                                      fontSize: 14,
-                                      mainColor: Colors.white,
+                          // --- BALANCE CARD ---
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(25),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF00E676), Color(0xFF00BFA5)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primaryGreen.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                build3DText(
+                                  "Current Balance",
+                                  fontSize: 14,
+                                  mainColor: Colors.white.withOpacity(0.9),
+                                  shadowColor: Colors.black54,
+                                  depth: 1.5,
+                                ),
+                                const SizedBox(height: 10),
+                                build3DText(
+                                  "₹${balance.toStringAsFixed(2)}",
+                                  fontSize: 42,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black,
+                                  depth: 3,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                const SizedBox(height: 15),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      build3DIcon(
+                                        Icons.send,
+                                        size: 16,
+                                        mainColor: Colors.white,
+                                        shadowColor: Colors.black54,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      build3DText(
+                                        "Total SMS Sent: $totalSms",
+                                        fontSize: 13,
+                                        mainColor: Colors.white,
+                                        shadowColor: Colors.black54,
+                                        depth: 1,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // --- LUCKY WHEEL SECTION ---
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    build3DIcon(
+                                      Icons.casino,
+                                      size: 24,
+                                      mainColor: Colors.yellow,
                                       shadowColor: Colors.black54,
                                     ),
-                                    backgroundColor: primaryGreen,
+                                    const SizedBox(width: 10),
+                                    build3DText(
+                                      "Lucky Wheel",
+                                      fontSize: 20,
+                                      mainColor: Colors.white,
+                                      shadowColor: Colors.black54,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 15),
+                                Text(
+                                  "Spin the wheel daily to win amazing prizes!",
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 14,
                                   ),
-                                );
-                              },
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                
+                                // Lucky Wheel Widget
+                                LuckyWheel(
+                                  onSpinComplete: () {
+                                    print("Wheel spin completed!");
+                                  },
+                                  onPrizeWon: (prizeValue) {
+                                    print("Prize won: ₹$prizeValue");
+                                    // Refresh balance after winning
+                                    _loadRealData();
+                                  },
+                                ),
+                              ],
                             ),
+                          ),
 
-                            // WITHDRAW
-                            _buildActionBtn(
-                              Icons.download,
-                              "Withdraw",
-                              () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const WithdrawScreen()),
-                                );
-                              },
-                            ),
+                          const SizedBox(height: 30),
 
-                            // HISTORY
-                            _buildActionBtn(
-                              Icons.history,
-                              "History",
-                              () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const HistoryScreen()),
-                                );
-                              },
+                          // --- QUICK ACTIONS ---
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
                             ),
-                          ],
-                        ),
-                      ],
+                            child: Column(
+                              children: [
+                                build3DText(
+                                  "Quick Actions",
+                                  fontSize: 18,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black54,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                const SizedBox(height: 20),
+                                
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    // DEPOSIT
+                                    _buildActionBtn(
+                                      Icons.add,
+                                      "Deposit",
+                                      () {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: build3DText(
+                                              "Please contact Admin to Deposit funds.",
+                                              fontSize: 14,
+                                              mainColor: Colors.white,
+                                              shadowColor: Colors.black54,
+                                            ),
+                                            backgroundColor: primaryGreen,
+                                          ),
+                                        );
+                                      },
+                                    ),
+
+                                    // WITHDRAW
+                                    _buildActionBtn(
+                                      Icons.download,
+                                      "Withdraw",
+                                      () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => const WithdrawScreen()),
+                                        );
+                                      },
+                                    ),
+
+                                    // HISTORY
+                                    _buildActionBtn(
+                                      Icons.history,
+                                      "History",
+                                      () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => const HistoryScreen()),
+                                        );
+                                      },
+                                    ),
+
+                                    // NOTIFICATIONS
+                                    _buildActionBtn(
+                                      Icons.notifications,
+                                      "Alerts",
+                                      () {
+                                        // Add notification screen navigation here
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: build3DText(
+                                              "Notifications feature coming soon!",
+                                              fontSize: 14,
+                                              mainColor: Colors.white,
+                                              shadowColor: Colors.black54,
+                                            ),
+                                            backgroundColor: accentOrange,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // --- STATISTICS ---
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildStatItem(
+                                  Icons.account_balance_wallet,
+                                  "Balance",
+                                  "₹${balance.toStringAsFixed(2)}",
+                                  Colors.green,
+                                ),
+                                _buildStatItem(
+                                  Icons.send,
+                                  "SMS Sent",
+                                  totalSms.toString(),
+                                  Colors.blue,
+                                ),
+                                _buildStatItem(
+                                  Icons.celebration,
+                                  "Daily Spin",
+                                  "Available",
+                                  Colors.orange,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     ),
                   ),
           ),
@@ -369,36 +519,70 @@ class _HomeDashboardState extends State<HomeDashboard> {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            height: 70,
-            width: 70,
+            height: 60,
+            width: 60,
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
-            child: build3DIcon(
+            child: Icon(
               icon,
-              size: 32,
-              mainColor: primaryGreen,
-              shadowColor: Colors.black54,
-              depth: 2,
+              size: 28,
+              color: primaryGreen,
             ),
           ),
         ),
-        const SizedBox(height: 10),
-        build3DText(
+        const SizedBox(height: 8),
+        Text(
           label,
-          fontSize: 14,
-          mainColor: Colors.white,
-          shadowColor: Colors.black54,
-          depth: 1.5,
-          fontWeight: FontWeight.w500,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatItem(IconData icon, String title, String value, Color color) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 24,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            color: Colors.white.withOpacity(0.8),
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
