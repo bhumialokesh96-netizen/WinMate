@@ -192,6 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String phone = "Loading...";
   String userId = "";
   bool _isLoading = true;
+  Map<String, dynamic>? supportLinks;
 
   // Color constants for the green theme
   static const primaryGreen = Color(0xFF00C853);
@@ -202,6 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
+    _loadSupportLinks();
   }
 
   Future<void> _loadProfile() async {
@@ -220,6 +222,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadSupportLinks() async {
+    try {
+      final data = await supabase
+          .from('support_links')
+          .select()
+          .single();
+      setState(() {
+        supportLinks = data;
+      });
+    } catch (e) {
+      print("Error loading support links: $e");
+      // Set default links if not found in database
+      setState(() {
+        supportLinks = {
+          'whatsapp_link': 'https://chat.whatsapp.com/YOUR_GROUP_LINK',
+          'telegram_link': 'https://t.me/YOUR_GROUP_LINK',
+          'email': 'support@winmate.com',
+          'phone': '+91-XXXXXXXXXX',
+        };
+      });
     }
   }
 
@@ -281,6 +306,189 @@ class _ProfileScreenState extends State<ProfileScreen> {
           (route) => false,
         );
       }
+    }
+  }
+
+  void _showSupportOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              spreadRadius: 5,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              build3DText(
+                "Contact Support",
+                fontSize: 20,
+                mainColor: primaryGreen,
+                shadowColor: Colors.black54,
+                fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 20),
+              
+              // WhatsApp Option
+              _buildSupportOption(
+                icon: Icons.whatsapp,
+                title: "WhatsApp Group",
+                subtitle: "Join our community",
+                color: const Color(0xFF25D366),
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchWhatsApp();
+                },
+              ),
+              
+              const SizedBox(height: 15),
+              
+              // Telegram Option
+              _buildSupportOption(
+                icon: Icons.telegram,
+                title: "Telegram Group",
+                subtitle: "Get instant updates",
+                color: const Color(0xFF0088CC),
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchTelegram();
+                },
+              ),
+              
+              const SizedBox(height: 15),
+              
+              // Email Option
+              _buildSupportOption(
+                icon: Icons.email,
+                title: "Email Support",
+                subtitle: supportLinks?['email'] ?? 'support@winmate.com',
+                color: Colors.grey,
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchEmail();
+                },
+              ),
+              
+              const SizedBox(height: 15),
+              
+              // Phone Option
+              _buildSupportOption(
+                icon: Icons.phone,
+                title: "Call Support",
+                subtitle: supportLinks?['phone'] ?? '+91-XXXXXXXXXX',
+                color: Colors.green,
+                onTap: () {
+                  Navigator.pop(context);
+                  _launchPhone();
+                },
+              ),
+              
+              const SizedBox(height: 20),
+              
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: build3DText(
+                  "Cancel",
+                  fontSize: 16,
+                  mainColor: Colors.grey,
+                  shadowColor: Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _launchWhatsApp() async {
+    final url = supportLinks?['whatsapp_link'] ?? 'https://chat.whatsapp.com/YOUR_GROUP_LINK';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: build3DText(
+            "Could not open WhatsApp",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchTelegram() async {
+    final url = supportLinks?['telegram_link'] ?? 'https://t.me/YOUR_GROUP_LINK';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: build3DText(
+            "Could not open Telegram",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final email = supportLinks?['email'] ?? 'support@winmate.com';
+    final url = 'mailto:$email?subject=Support Request&body=Hello Support Team,';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: build3DText(
+            "Could not open email",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _launchPhone() async {
+    final phone = supportLinks?['phone'] ?? '+91-XXXXXXXXXX';
+    final url = 'tel:$phone';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: build3DText(
+            "Could not make a call",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -471,16 +679,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 Icons.help_outline,
                                 "Help & Support",
                                 Colors.purple,
+                                _showSupportOptions,
+                              ),
+
+                              // FAQ
+                              _buildMenuItem(
+                                Icons.question_answer,
+                                "FAQs",
+                                Colors.teal,
                                 () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: build3DText(
-                                        "Help & Support coming soon!",
-                                        fontSize: 14,
-                                        mainColor: Colors.white,
-                                        shadowColor: Colors.black54,
-                                      ),
-                                      backgroundColor: primaryGreen,
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const FAQPage(),
                                     ),
                                   );
                                 },
@@ -610,6 +821,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         onTap: onTap,
       ),
+    );
+  }
+
+  Widget _buildSupportOption({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.poppins(
+          fontSize: 12,
+          color: Colors.grey,
+        ),
+      ),
+      trailing: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: primaryGreen.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.arrow_forward_ios,
+          size: 14,
+          color: primaryGreen,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 
