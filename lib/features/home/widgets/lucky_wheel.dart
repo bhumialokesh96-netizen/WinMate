@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:confetti/confetti.dart';
 import 'dart:math';
-import 'package:confetti/confetti.dart'; // Add this dependency
 
 class LuckyWheel extends StatefulWidget {
   final VoidCallback? onSpinComplete;
@@ -29,7 +29,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
   double selectedPrizeValue = 0;
   String selectedPrizeLabel = '';
   
-  // Wheel colors
+  // Define wheel colors here instead of in painter
   static const List<Color> wheelColors = [
     Color(0xFF00C853), // Green
     Color(0xFFFF9100), // Orange
@@ -83,11 +83,8 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
     if (isSpinning || prizes.isEmpty) return;
     
     setState(() => isSpinning = true);
-    
-    // Reset animation
     _controller.reset();
     
-    // Calculate random prize based on probability
     final random = Random();
     final randomValue = random.nextDouble() * 100;
     
@@ -108,7 +105,6 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
         selectedPrizeLabel = selectedPrize!['label'] as String;
       });
       
-      // Calculate rotation angle (multiple full rotations + offset for selected prize)
       final prizeIndex = prizes.indexOf(selectedPrize!);
       final totalPrizes = prizes.length;
       final segmentAngle = 360 / totalPrizes;
@@ -123,22 +119,13 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
       ));
       
       _controller.forward().then((_) async {
-        // Show confetti if prize has value
         if (selectedPrizeValue > 0) {
           _confettiController.play();
-        }
-        
-        // Update user balance if prize has value
-        if (selectedPrizeValue > 0) {
           await _addPrizeToBalance(selectedPrizeValue);
         }
         
-        // Show result dialog
         _showResultDialog(selectedPrizeLabel, selectedPrizeValue);
-        
         setState(() => isSpinning = false);
-        
-        // Callbacks
         widget.onSpinComplete?.call();
         widget.onPrizeWon?.call(selectedPrizeValue);
       });
@@ -149,7 +136,6 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
     try {
       final user = supabase.auth.currentUser;
       if (user != null) {
-        // Get current balance
         final userData = await supabase
             .from('users')
             .select('balance')
@@ -159,13 +145,10 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
         final currentBalance = (userData['balance'] as num).toDouble();
         final newBalance = currentBalance + amount;
         
-        // Update balance
         await supabase
             .from('users')
             .update({'balance': newBalance})
             .eq('id', user.id);
-        
-        print("Balance updated: +₹$amount");
       }
     } catch (e) {
       print("Error updating balance: $e");
@@ -178,9 +161,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -192,21 +173,10 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
             const SizedBox(height: 20),
             Text(
               value > 0 ? "🎉 Congratulations! " : "Better Luck Next Time!",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            Text(
-              "You won:",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[700],
-              ),
-            ),
+            Text("You won:", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
             const SizedBox(height: 5),
             Text(
               label,
@@ -220,11 +190,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
               const SizedBox(height: 5),
               Text(
                 "₹$value has been added to your balance!",
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.green,
-                ),
-                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 14, color: Colors.green),
               ),
             ],
             const SizedBox(height: 20),
@@ -233,18 +199,9 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
               style: ElevatedButton.styleFrom(
                 backgroundColor: value > 0 ? Colors.green : Colors.orange,
                 minimumSize: const Size(150, 45),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text(
-                "OK",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: const Text("OK", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -278,32 +235,6 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
           ),
           child: Column(
             children: [
-              // Title
-              Text(
-                "Lucky Wheel",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade800,
-                  shadows: const [
-                    Shadow(
-                      color: Colors.black26,
-                      blurRadius: 2,
-                      offset: Offset(1, 1),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Spin to win amazing prizes!",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 20),
-
               // Wheel Container
               Container(
                 height: 300,
@@ -341,7 +272,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
                           ),
                         ),
                         child: CustomPaint(
-                          painter: _WheelPainter(prizes: prizes),
+                          painter: _WheelPainter(prizes: prizes, wheelColors: wheelColors),
                         ),
                       ),
                     ),
@@ -373,11 +304,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
                               end: Alignment.bottomRight,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.arrow_upward,
-                            color: Colors.white,
-                            size: 24,
-                          ),
+                          child: const Icon(Icons.arrow_upward, color: Colors.white, size: 24),
                         ),
                       ),
                     ),
@@ -418,9 +345,7 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 5,
                     shadowColor: Colors.green.withOpacity(0.5),
                   ),
@@ -428,37 +353,16 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(Icons.casino, size: 24),
                             const SizedBox(width: 10),
-                            Text(
-                              "SPIN WHEEL",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
+                            Text("SPIN WHEEL", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ],
                         ),
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              // Info Text
-              Text(
-                "Daily free spin available",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
                 ),
               ),
             ],
@@ -490,11 +394,11 @@ class _LuckyWheelState extends State<LuckyWheel> with SingleTickerProviderStateM
   }
 }
 
-// Custom painter for wheel segments
 class _WheelPainter extends CustomPainter {
   final List<Map<String, dynamic>> prizes;
+  final List<Color> wheelColors;
 
-  _WheelPainter({required this.prizes});
+  _WheelPainter({required this.prizes, required this.wheelColors});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -504,14 +408,13 @@ class _WheelPainter extends CustomPainter {
     final radius = size.width / 2;
     final segmentAngle = 2 * pi / prizes.length;
 
-    // Draw segments
     for (int i = 0; i < prizes.length; i++) {
       final startAngle = i * segmentAngle;
       final sweepAngle = segmentAngle;
 
       // Draw segment
       final segmentPaint = Paint()
-        ..color = _WheelState.wheelColors[i % _WheelState.wheelColors.length]
+        ..color = wheelColors[i % wheelColors.length]
         ..style = PaintingStyle.fill;
 
       canvas.drawArc(
@@ -548,13 +451,7 @@ class _WheelPainter extends CustomPainter {
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(
-              color: Colors.black,
-              blurRadius: 2,
-              offset: Offset(1, 1),
-            ),
-          ],
+          shadows: [Shadow(color: Colors.black, blurRadius: 2, offset: Offset(1, 1))],
         ),
       );
 
