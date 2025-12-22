@@ -274,34 +274,35 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
               ],
               const SizedBox(height: 25),
               GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.white, Colors.grey.shade200],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: const Text(
-                    "CONTINUE",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
+  onTap: () => Navigator.pop(context),
+  child: Container(
+    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+    decoration: BoxDecoration(
+      gradient: LinearGradient( // Fixed: Removed const
+        colors: [Colors.white, Colors.grey.shade200],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(15),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 10,
+          offset: const Offset(0, 5),
+        ),
+      ],
+    ),
+    child: const Text(
+      "CONTINUE",
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    ),
+  ),
+),
+
             ],
           ),
         ),
