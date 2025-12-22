@@ -19,10 +19,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // 0 = Enter Email, 1 = Enter OTP, 2 = Enter New Password
   int _currentStep = 0; 
   bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  // Color constants for the green theme
+  static const primaryGreen = Color(0xFF00C853);
+  static const lightGreen = Color(0xFFE8F5E9);
+  static const accentOrange = Color(0xFFFF9100);
 
   // --- STEP 1: SEND CODE ---
   Future<void> _sendCode() async {
-    if (_emailController.text.isEmpty) return;
+    if (_emailController.text.isEmpty) {
+      _showMessage("Please enter your email address", Colors.orange);
+      return;
+    }
+    
     setState(() => _isLoading = true);
     
     try {
@@ -31,7 +41,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _isLoading = false;
         _currentStep = 1; // Move to Next Step
       });
-      _showMessage("Code sent! Check your email.", Colors.green);
+      _showMessage("Verification code sent! Check your email.", primaryGreen);
     } catch (e) {
       setState(() => _isLoading = false);
       _showMessage("Error: ${e.toString().split('\n')[0]}", Colors.red);
@@ -40,11 +50,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   // --- STEP 2: VERIFY CODE ---
   Future<void> _verifyCode() async {
-    if (_otpController.text.length != 6) return;
+    if (_otpController.text.length != 6) {
+      _showMessage("Please enter the 6-digit code", Colors.orange);
+      return;
+    }
+    
     setState(() => _isLoading = true);
 
     try {
-      // 'recovery' type is specific for Password Reset
       final res = await supabase.auth.verifyOTP(
         email: _emailController.text.trim(),
         token: _otpController.text.trim(),
@@ -59,16 +72,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      _showMessage("Invalid Code", Colors.red);
+      _showMessage("Invalid verification code", Colors.red);
     }
   }
 
   // --- STEP 3: SAVE NEW PASSWORD ---
   Future<void> _updatePassword() async {
     if (_newPassController.text.length < 6) {
-      _showMessage("Password must be at least 6 characters", Colors.red);
+      _showMessage("Password must be at least 6 characters", Colors.orange);
       return;
     }
+    
     setState(() => _isLoading = true);
 
     try {
@@ -77,81 +91,280 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       );
       
       if (mounted) {
-        _showMessage("Password Updated! Please Login.", Colors.green);
+        _showMessage("Password updated successfully!", primaryGreen);
         // Go back to Login Screen
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      _showMessage("Update Failed: ${e.toString()}", Colors.red);
+      _showMessage("Update failed: ${e.toString().split('\n')[0]}", Colors.red);
     }
   }
 
   void _showMessage(String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg), 
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0, iconTheme: const IconThemeData(color: Colors.white)),
-      body: Padding(
-        padding: const EdgeInsets.all(25.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_reset, color: Color(0xFFE94560), size: 60),
-            const SizedBox(height: 20),
-            
-            // Dynamic Title
-            Text(
-              _currentStep == 0 ? "Reset Password" : (_currentStep == 1 ? "Enter Code" : "New Password"),
-              style: GoogleFonts.poppins(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+      backgroundColor: primaryGreen,
+      body: Stack(
+        children: [
+          // Gradient Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF00E676),
+                  Color(0xFF00C853),
+                  Color(0xFF00BFA5),
+                ],
+              ),
             ),
-            const SizedBox(height: 30),
+          ),
+          
+          // Pattern Overlay
+          Opacity(
+            opacity: 0.05,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage("https://www.transparenttextures.com/patterns/cubes.png"),
+                  repeat: ImageRepeat.repeat,
+                ),
+              ),
+            ),
+          ),
 
-            // --- UI CHANGES BASED ON STEP ---
-            if (_currentStep == 0) ...[
-              _buildTextField(_emailController, "Enter your Email", Icons.email, false),
-              const SizedBox(height: 20),
-              _buildButton("SEND CODE", _sendCode),
-            ],
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  // App Bar with Back Button
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      ),
+                      Expanded(
+                        child: Text(
+                          "Reset Password",
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Balance the back button space
+                    ],
+                  ),
 
-            if (_currentStep == 1) ...[
-              Text("Sent to ${_emailController.text}", style: const TextStyle(color: Colors.white54)),
-              const SizedBox(height: 20),
-              _buildTextField(_otpController, "6-Digit Code", Icons.numbers, false, isNumber: true),
-              const SizedBox(height: 20),
-              _buildButton("VERIFY CODE", _verifyCode),
-            ],
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          
+                          // Icon
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.lock_reset,
+                              size: 50,
+                              color: primaryGreen,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 30),
+                          
+                          // Dynamic Title
+                          Text(
+                            _currentStep == 0 
+                                ? "Reset Password" 
+                                : _currentStep == 1 
+                                    ? "Enter Verification Code" 
+                                    : "Create New Password",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 10),
+                          
+                          // Subtitle
+                          Text(
+                            _currentStep == 0 
+                                ? "Enter your email to receive a verification code"
+                                : _currentStep == 1 
+                                    ? "Enter the 6-digit code sent to your email"
+                                    : "Create a strong new password for your account",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          
+                          const SizedBox(height: 40),
 
-            if (_currentStep == 2) ...[
-              _buildTextField(_newPassController, "Enter New Password", Icons.lock, true),
-              const SizedBox(height: 20),
-              _buildButton("SAVE PASSWORD", _updatePassword),
-            ],
-          ],
-        ),
+                          // --- STEP 0: EMAIL INPUT ---
+                          if (_currentStep == 0) ...[
+                            _buildTextField(
+                              _emailController, 
+                              "Email Address", 
+                              Icons.email, 
+                              TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 30),
+                            _buildButton("SEND VERIFICATION CODE", _sendCode),
+                          ],
+
+                          // --- STEP 1: OTP INPUT ---
+                          if (_currentStep == 1) ...[
+                            Container(
+                              padding: const EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                "Sent to: ${_emailController.text}",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            _buildTextField(
+                              _otpController, 
+                              "6-Digit Code", 
+                              Icons.numbers, 
+                              TextInputType.number,
+                              isOtp: true,
+                            ),
+                            const SizedBox(height: 30),
+                            _buildButton("VERIFY CODE", _verifyCode),
+                          ],
+
+                          // --- STEP 2: NEW PASSWORD ---
+                          if (_currentStep == 2) ...[
+                            _buildTextField(
+                              _newPassController, 
+                              "New Password", 
+                              Icons.lock, 
+                              TextInputType.text,
+                              isPassword: true,
+                            ),
+                            const SizedBox(height: 30),
+                            _buildButton("SAVE NEW PASSWORD", _updatePassword),
+                          ],
+                          
+                          const SizedBox(height: 20),
+                          
+                          // Progress Indicators
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(3, (index) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: index <= _currentStep 
+                                      ? Colors.white 
+                                      : Colors.white.withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, IconData icon, bool isPass, {bool isNumber = false}) {
+  Widget _buildTextField(
+    TextEditingController controller, 
+    String hint, 
+    IconData icon, 
+    TextInputType type, {
+    bool isPassword = false,
+    bool isOtp = false,
+  }) {
     return TextField(
       controller: controller,
-      obscureText: isPass,
-      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      maxLength: isNumber ? 6 : null,
-      style: const TextStyle(color: Colors.white),
+      obscureText: isPassword ? _obscurePassword : false,
+      keyboardType: type,
+      maxLength: isOtp ? 6 : null,
+      style: const TextStyle(color: Colors.black87),
+      textAlign: isOtp ? TextAlign.center : TextAlign.left,
       decoration: InputDecoration(
-        counterText: "",
-        prefixIcon: Icon(icon, color: Colors.white54),
+        prefixIcon: isOtp ? null : Icon(icon, color: Colors.grey),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+              )
+            : null,
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white24),
+        hintStyle: TextStyle(color: Colors.grey[500]),
         filled: true,
-        fillColor: const Color(0xFF16213E),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        counterText: isOtp ? "" : null,
       ),
     );
   }
@@ -159,13 +372,29 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 55,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE94560)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: accentOrange,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          elevation: 5,
+          shadowColor: accentOrange.withOpacity(0.5),
+        ),
         onPressed: _isLoading ? null : onPressed,
         child: _isLoading 
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text(text, style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(color: Colors.white),
+              )
+            : Text(
+                text,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
       ),
     );
   }
