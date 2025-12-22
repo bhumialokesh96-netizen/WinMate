@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
-import 'package:winmate/utils/style.dart'; // Custom styling import
 
 class LuckyWheelPage extends StatefulWidget {
   const LuckyWheelPage({super.key});
@@ -24,16 +23,16 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
   String selectedPrizeLabel = '';
   int spinsAvailable = 0;
   
-  // Premium wheel design with iPhone image background
+  // Premium casino colors
   static const List<Color> wheelColors = [
-    Color(0xFF3ED598), // Luxury Green
-    Color(0xFFFFD600), // Gold
-    Color(0xFFFA5C7C), // Rose Gold
-    Color(0xFF6C5DD3), // Deep Purple
-    Color(0xFFFF754C), // Orange
-    Color(0xFF00E1FF), // Cyan
-    Color(0xFFFFFFFF), // White
-    Color(0xFF000000), // Black
+    Color(0xFFC62828), // Deep Red
+    Color(0xFF283593), // Deep Blue
+    Color(0xFF2E7D32), // Forest Green
+    Color(0xFFF9A825), // Golden Yellow
+    Color(0xFF6A1B9A), // Royal Purple
+    Color(0xFF00838F), // Teal
+    Color(0xFFEF6C00), // Deep Orange
+    Color(0xFF37474F), // Dark Grey
   ];
 
   @override
@@ -42,11 +41,11 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
     _loadPrizesAndSpins();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
+      duration: const Duration(milliseconds: 4500), // Slower for dramatic effect
     );
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.decelerate,
+      curve: Curves.easeOutExpo, // Premium casino feel
     );
   }
 
@@ -61,14 +60,12 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
     try {
       final user = supabase.auth.currentUser;
       if (user != null) {
-        // Get spins available
         final userData = await supabase
             .from('users')
             .select('spins_available')
             .eq('id', user.id)
             .single();
         
-        // Load prizes
         final prizesData = await supabase
             .from('wheel_prizes')
             .select()
@@ -90,11 +87,8 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
     if (isSpinning || prizes.isEmpty || spinsAvailable <= 0) return;
     
     setState(() => isSpinning = true);
-    
-    // Reduce spin count
     await _updateSpins(spinsAvailable - 1);
 
-    // Random prize selection
     final random = Random();
     final randomValue = random.nextDouble() * 100;
     
@@ -115,7 +109,6 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
         selectedPrizeLabel = selectedPrize!['label'] as String;
       });
       
-      // Animation setup
       final prizeIndex = prizes.indexOf(selectedPrize!);
       final totalPrizes = prizes.length;
       final segmentAngle = 360 / totalPrizes;
@@ -126,7 +119,7 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
         end: targetAngle,
       ).animate(CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.decelerate),
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOutExpo),
       ));
       
       _controller.forward().then((_) async {
@@ -149,7 +142,6 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
             .from('users')
             .update({'spins_available': newSpinCount})
             .eq('id', user.id);
-        
         setState(() => spinsAvailable = newSpinCount);
       }
     } catch (e) {
@@ -184,51 +176,119 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              value > 0 ? Icons.celebration : Icons.sentiment_neutral,
-              size: 60,
-              color: value > 0 ? Colors.green : Colors.orange,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: 20),
-            Text(
-              value > 0 ? "🎉 Congratulations! " : "Better Luck Next Time!",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text("You won:", style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: value > 0 ? Colors.green : Colors.orange,
-              ),
-            ),
-            if (value > 0) ...[
-              const SizedBox(height: 5),
-              Text(
-                "₹$value has been added to your balance!",
-                style: const TextStyle(fontSize: 14, color: Colors.green),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 25,
+                spreadRadius: 5,
               ),
             ],
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: value > 0 ? Colors.green : Colors.orange,
-                minimumSize: const Size(150, 45),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                value > 0 ? Icons.celebration : Icons.sentiment_neutral,
+                size: 70,
+                color: value > 0 ? Colors.white : Colors.black,
               ),
-              child: const Text("OK", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
-          ],
+              const SizedBox(height: 25),
+              Text(
+                value > 0 ? "🎉 JACKPOT! " : "Better Luck Next Time!",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(color: Colors.black, blurRadius: 5, offset: Offset(2, 2)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+              Container(
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "You won:",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: value > 0 ? Colors.white : Colors.yellow,
+                        shadows: [
+                          Shadow(color: Colors.black, blurRadius: 8, offset: const Offset(2, 2)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (value > 0) ...[
+                const SizedBox(height: 15),
+                Text(
+                  "₹$value has been added to your balance!",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 25),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.white, Colors.grey.shade200],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    "CONTINUE",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -238,222 +298,375 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Lucky Wheel", style: TextStyle(color: Colors.white)),
-        backgroundColor: AppStyle.primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
+        title: const Text(
+          "LUCKY WHEEL",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
+        ),
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
+        elevation: 0,
       ),
-      body: Stack(
-        children: [
-          // iPhone background image
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assests/iphone_background.jpg"), // Add iPhone image to assets
-                fit: BoxFit.cover,
-                opacity: 0.3,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF0F0F0F),
+              Color(0xFF1A1A1A),
+              Color(0xFF0F0F0F),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Background pattern
+            Opacity(
+              opacity: 0.05,
+              child: Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage("https://www.transparenttextures.com/patterns/dark-stripes.png"),
+                    repeat: ImageRepeat.repeat,
+                  ),
+                ),
               ),
             ),
-          ),
-          
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Spins Remaining
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.casino, color: Colors.white, size: 24),
-                        const SizedBox(width: 10),
-                        Text(
-                          "Spins Available: $spinsAvailable",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+            
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Spins Counter
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.withOpacity(0.5),
+                            blurRadius: 15,
+                            spreadRadius: 3,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.casino, color: Colors.white, size: 28),
+                          const SizedBox(width: 12),
+                          Text(
+                            "SPINS: $spinsAvailable",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              shadows: [
+                                Shadow(color: Colors.black, blurRadius: 3, offset: Offset(1, 1)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                  
-                  // Wheel Container
-                  Container(
-                    height: 300,
-                    width: 300,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 5),
+                    
+                    const SizedBox(height: 40),
+                    
+                    // Premium Wheel Container
+                    Container(
+                      padding: const EdgeInsets.all(15), // Golden ring padding
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFFFD700),
+                            Color(0xFFFFA000),
+                            Color(0xFFFFD700),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Wheel
-                        AnimatedBuilder(
-                          animation: _animation,
-                          builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _animation.value * (pi / 180),
-                              child: child,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.withOpacity(0.8),
+                            blurRadius: 25,
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer glowing lights
+                          ...List.generate(24, (index) {
+                            final angle = (2 * pi / 24) * index;
+                            final radius = 165.0;
+                            return Positioned(
+                              left: 165 + cos(angle) * radius,
+                              top: 165 + sin(angle) * radius,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.yellowAccent,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.yellowAccent,
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
-                          },
-                          child: Container(
-                            width: 280,
-                            height: 280,
+                          }),
+                          
+                          // Wheel Container
+                          Container(
+                            height: 330,
+                            width: 330,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: SweepGradient(
-                                colors: wheelColors,
-                                stops: List.generate(wheelColors.length, (i) => i / wheelColors.length),
-                              ),
-                            ),
-                            child: CustomPaint(
-                              painter: _WheelPainter(prizes: prizes, wheelColors: wheelColors),
-                            ),
-                          ),
-                        ),
-
-                        // Center Circle with iPhone icon
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 10,
-                                spreadRadius: 2,
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [Colors.black, Colors.grey.shade800],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.phone_iphone,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Pointer
-                        Positioned(
-                          top: 0,
-                          child: Container(
-                            width: 30,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(15),
-                                bottomRight: Radius.circular(15),
-                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 5,
+                                  color: Colors.black.withOpacity(0.5),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Wheel with premium painting
+                                AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return Transform.rotate(
+                                      angle: _animation.value * (pi / 180),
+                                      child: child,
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 320,
+                                    height: 320,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.black,
+                                    ),
+                                    child: CustomPaint(
+                                      painter: _PremiumWheelPainter(prizes: prizes, wheelColors: wheelColors),
+                                    ),
+                                  ),
+                                ),
+                                
+                                // Inner decorative ring
+                                Container(
+                                  width: 180,
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.3),
+                                      width: 2,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  
-                  // Spin Button
-                  SizedBox(
-                    width: 200,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: spinsAvailable > 0 && !isSpinning ? _spinWheel : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppStyle.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        elevation: 5,
-                      ),
-                      child: isSpinning
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.casino, size: 24),
-                                const SizedBox(width: 10),
-                                Text("SPIN WHEEL", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ],
+                          
+                          // Premium Triangle Pointer
+                          Positioned(
+                            top: 0,
+                            child: CustomPaint(
+                              size: const Size(40, 50),
+                              painter: _TrianglePointerPainter(),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    
+                    const SizedBox(height: 50),
+                    
+                    // Premium SPIN Button
+                    GestureDetector(
+                      onTap: spinsAvailable > 0 && !isSpinning ? _spinWheel : null,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 15,
+                              offset: const Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Colors.amber.withOpacity(0.6),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.5),
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: isSpinning
+                              ? const SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.casino,
+                                      color: Colors.white,
+                                      size: 32,
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      "SPIN",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                        shadows: [
+                                          Shadow(
+                                            color: Colors.black,
+                                            blurRadius: 5,
+                                            offset: const Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 30),
+                    
+                    // Prizes List
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            "PRIZES TO WIN",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: prizes.map((prize) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  prize['label'].toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Confetti
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: pi / 2,
+                maxBlastForce: 25,
+                minBlastForce: 15,
+                emissionFrequency: 0.03,
+                numberOfParticles: 30,
+                gravity: 0.1,
+                colors: const [
+                  Colors.yellow,
+                  Colors.orange,
+                  Colors.red,
+                  Colors.pink,
+                  Colors.purple,
+                  Colors.blue,
+                  Colors.green,
                 ],
               ),
             ),
-          ),
-
-          // Confetti
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: pi / 2,
-              maxBlastForce: 20,
-              minBlastForce: 10,
-              emissionFrequency: 0.05,
-              numberOfParticles: 20,
-              gravity: 0.1,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple,
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _WheelPainter extends CustomPainter {
+class _PremiumWheelPainter extends CustomPainter {
   final List<Map<String, dynamic>> prizes;
   final List<Color> wheelColors;
 
-  _WheelPainter({required this.prizes, required this.wheelColors});
+  _PremiumWheelPainter({required this.prizes, required this.wheelColors});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -463,38 +676,53 @@ class _WheelPainter extends CustomPainter {
     final radius = size.width / 2;
     final segmentAngle = 2 * pi / prizes.length;
 
+    // Draw outer metallic ring
+    final outerRingPaint = Paint()
+      ..shader = const RadialGradient(
+        colors: [
+          Color(0xFFD4AF37),
+          Color(0xFFB8860B),
+          Color(0xFFD4AF37),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 8;
+
+    canvas.drawCircle(center, radius - 4, outerRingPaint);
+
+    // Draw segments with 3D effect
     for (int i = 0; i < prizes.length; i++) {
       final startAngle = i * segmentAngle;
       final sweepAngle = segmentAngle;
 
-      // Draw segment
+      // Main segment color
       final segmentPaint = Paint()
         ..color = wheelColors[i % wheelColors.length]
         ..style = PaintingStyle.fill;
 
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
+        Rect.fromCircle(center: center, radius: radius - 10),
         startAngle,
         sweepAngle,
         true,
         segmentPaint,
       );
 
-      // Draw border
-      final borderPaint = Paint()
-        ..color = Colors.white
+      // Add 3D shadow effect
+      final shadowPaint = Paint()
+        ..color = Colors.black.withOpacity(0.3)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2;
 
       canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
+        Rect.fromCircle(center: center, radius: radius - 10),
         startAngle,
         sweepAngle,
         true,
-        borderPaint,
+        shadowPaint,
       );
 
-      // Draw prize text
+      // Draw prize text with better styling
       final textAngle = startAngle + sweepAngle / 2;
       final textRadius = radius * 0.7;
       final textX = center.dx + textRadius * cos(textAngle);
@@ -504,9 +732,11 @@ class _WheelPainter extends CustomPainter {
         text: prizes[i]['label'].toString(),
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
-          shadows: [Shadow(color: Colors.black, blurRadius: 2, offset: Offset(1, 1))],
+          shadows: [
+            Shadow(color: Colors.black, blurRadius: 4, offset: Offset(2, 2)),
+          ],
         ),
       );
 
@@ -525,7 +755,72 @@ class _WheelPainter extends CustomPainter {
       canvas.rotate(textAngle + pi / 2);
       textPainter.paint(canvas, Offset.zero);
       canvas.restore();
+
+      // Add small decorative dots between segments
+      final dotAngle = startAngle + sweepAngle;
+      final dotX = center.dx + (radius - 5) * cos(dotAngle);
+      final dotY = center.dy + (radius - 5) * sin(dotAngle);
+      
+      final dotPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+      
+      canvas.drawCircle(Offset(dotX, dotY), 3, dotPaint);
     }
+
+    // Draw inner metallic ring
+    final innerRingPaint = Paint()
+      ..shader = const RadialGradient(
+        colors: [
+          Color(0xFFFFD700),
+          Color(0xFFB8860B),
+          Color(0xFFFFD700),
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.3))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4;
+
+    canvas.drawCircle(center, radius * 0.3, innerRingPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _TrianglePointerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..shader = const LinearGradient(
+        colors: [
+          Color(0xFFFF0000),
+          Color(0xFFFF4500),
+          Color(0xFFFF0000),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width / 2, 0);
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+
+    // Add shine effect
+    final shinePaint = Paint()
+      ..color = Colors.white.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    final shinePath = Path();
+    shinePath.moveTo(size.width * 0.3, size.height * 0.3);
+    shinePath.lineTo(size.width * 0.7, size.height * 0.3);
+    shinePath.lineTo(size.width * 0.6, size.height * 0.7);
+    shinePath.lineTo(size.width * 0.4, size.height * 0.7);
+    shinePath.close();
+
+    canvas.drawPath(shinePath, shinePaint);
   }
 
   @override
