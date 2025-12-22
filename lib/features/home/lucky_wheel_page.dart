@@ -1,7 +1,9 @@
+import 'dart:async'; // CRITICAL: Added for Timer
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:confetti/confetti.dart';
-import 'dart:math';
 
 class LuckyWheelPage extends StatefulWidget {
   const LuckyWheelPage({super.key});
@@ -15,14 +17,16 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
   late AnimationController _controller;
   late Animation<double> _animation;
   ConfettiController _confettiController = ConfettiController(duration: const Duration(seconds: 3));
-  
+  bool _isLedOn = false;
+  Timer? _timer;
+
   List<Map<String, dynamic>> prizes = [];
   bool isLoading = true;
   bool isSpinning = false;
   double selectedPrizeValue = 0;
   String selectedPrizeLabel = '';
   int spinsAvailable = 0;
-  
+
   // Premium casino colors
   static const List<Color> wheelColors = [
     Color(0xFFC62828), // Deep Red
@@ -41,17 +45,23 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
     _loadPrizesAndSpins();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4500), // Slower for dramatic effect
+      duration: const Duration(milliseconds: 4500), // Casino-style duration
     );
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutExpo, // Premium casino feel
     );
+
+    // Start LED animation
+    _timer = Timer.periodic(const Duration(milliseconds: 300), (timer) {
+      setState(() => _isLedOn = !_isLedOn);
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _timer?.cancel();
     _confettiController.dispose();
     super.dispose();
   }
@@ -65,12 +75,12 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
             .select('spins_available')
             .eq('id', user.id)
             .single();
-        
+
         final prizesData = await supabase
             .from('wheel_prizes')
             .select()
             .order('probability', ascending: false);
-        
+
         setState(() {
           spinsAvailable = (userData['spins_available'] ?? 0) as int;
           prizes = List<Map<String, dynamic>>.from(prizesData);
@@ -85,16 +95,17 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
 
   Future<void> _spinWheel() async {
     if (isSpinning || prizes.isEmpty || spinsAvailable <= 0) return;
-    
+
     setState(() => isSpinning = true);
+    HapticFeedback.mediumImpact(); // Tactile feedback on spin start
     await _updateSpins(spinsAvailable - 1);
 
     final random = Random();
     final randomValue = random.nextDouble() * 100;
-    
+
     double cumulativeProbability = 0;
     Map<String, dynamic>? selectedPrize;
-    
+
     for (var prize in prizes) {
       cumulativeProbability += (prize['probability'] as num).toDouble();
       if (randomValue <= cumulativeProbability) {
@@ -102,18 +113,21 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
         break;
       }
     }
-    
+
     if (selectedPrize != null) {
       setState(() {
         selectedPrizeValue = (selectedPrize!['value'] as num).toDouble();
         selectedPrizeLabel = selectedPrize!['label'] as String;
       });
-      
+
       final prizeIndex = prizes.indexOf(selectedPrize!);
       final totalPrizes = prizes.length;
       final segmentAngle = 360 / totalPrizes;
-      final targetAngle = 360 * 5 + (segmentAngle * prizeIndex) - (segmentAngle / 2);
       
+      // CRITICAL: -90 adjustment for 12 o'clock pointer alignment
+      final targetAngle =
+          360 * 5 + (segmentAngle * prizeIndex) - (segmentAngle / 2) - 90;
+
       _animation = Tween<double>(
         begin: 0,
         end: targetAngle,
@@ -121,13 +135,14 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
         parent: _controller,
         curve: const Interval(0.0, 1.0, curve: Curves.easeOutExpo),
       ));
-      
+
       _controller.forward().then((_) async {
         if (selectedPrizeValue > 0) {
           _confettiController.play();
           await _addPrizeToBalance(selectedPrizeValue);
         }
-        
+
+        HapticFeedback.heavyImpact(); // Tactile feedback on result
         _showResultDialog(selectedPrizeLabel, selectedPrizeValue);
         setState(() => isSpinning = false);
       });
@@ -158,10 +173,10 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
             .select('balance')
             .eq('id', user.id)
             .single();
-        
+
         final currentBalance = (userData['balance'] as num).toDouble();
         final newBalance = currentBalance + amount;
-        
+
         await supabase
             .from('users')
             .update({'balance': newBalance})
@@ -337,7 +352,7 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                 ),
               ),
             ),
-            
+
             Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -382,9 +397,9 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Premium Wheel Container
                     Container(
                       padding: const EdgeInsets.all(15), // Golden ring padding
@@ -417,24 +432,28 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                             return Positioned(
                               left: 165 + cos(angle) * radius,
                               top: 165 + sin(angle) * radius,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: Colors.yellowAccent,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.yellowAccent,
-                                      blurRadius: 8,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
+                              child: AnimatedOpacity(
+                                opacity: _isLedOn ? 1.0 : 0.3,
+                                duration: const Duration(milliseconds: 300),
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: Colors.yellowAccent,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.yellowAccent,
+                                        blurRadius: 8,
+                                        spreadRadius: 2,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
                           }),
-                          
+
                           // Wheel Container
                           Container(
                             height: 330,
@@ -474,7 +493,7 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                                     ),
                                   ),
                                 ),
-                                
+
                                 // Inner decorative ring
                                 Container(
                                   width: 180,
@@ -490,7 +509,7 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                               ],
                             ),
                           ),
-                          
+
                           // Premium Triangle Pointer
                           Positioned(
                             top: 0,
@@ -502,9 +521,9 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 50),
-                    
+
                     // Premium SPIN Button
                     GestureDetector(
                       onTap: spinsAvailable > 0 && !isSpinning ? _spinWheel : null,
@@ -575,84 +594,8 @@ class _LuckyWheelPageState extends State<LuckyWheelPage> with SingleTickerProvid
                         ),
                       ),
                     ),
-                    
-                    const SizedBox(height: 30),
-                    
-                    // Prizes List
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "PRIZES TO WIN",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
-                            children: prizes.map((prize) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: Text(
-                                  prize['label'].toString(),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-              ),
-            ),
-            
-            // Confetti
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: pi / 2,
-                maxBlastForce: 25,
-                minBlastForce: 15,
-                emissionFrequency: 0.03,
-                numberOfParticles: 30,
-                gravity: 0.1,
-                colors: const [
-                  Colors.yellow,
-                  Colors.orange,
-                  Colors.red,
-                  Colors.pink,
-                  Colors.purple,
-                  Colors.blue,
-                  Colors.green,
-                ],
               ),
             ),
           ],
@@ -666,7 +609,10 @@ class _PremiumWheelPainter extends CustomPainter {
   final List<Map<String, dynamic>> prizes;
   final List<Color> wheelColors;
 
-  _PremiumWheelPainter({required this.prizes, required this.wheelColors});
+  _PremiumWheelPainter({
+    required this.prizes,
+    required this.wheelColors,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -676,115 +622,65 @@ class _PremiumWheelPainter extends CustomPainter {
     final radius = size.width / 2;
     final segmentAngle = 2 * pi / prizes.length;
 
-    // Draw outer metallic ring
-    final outerRingPaint = Paint()
-      ..shader = const RadialGradient(
-        colors: [
-          Color(0xFFD4AF37),
-          Color(0xFFB8860B),
-          Color(0xFFD4AF37),
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8;
-
-    canvas.drawCircle(center, radius - 4, outerRingPaint);
-
-    // Draw segments with 3D effect
     for (int i = 0; i < prizes.length; i++) {
-      final startAngle = i * segmentAngle;
-      final sweepAngle = segmentAngle;
+      final startAngle = i * segmentAngle - pi / 2;
 
-      // Main segment color
-      final segmentPaint = Paint()
-        ..color = wheelColors[i % wheelColors.length]
-        ..style = PaintingStyle.fill;
+      final rect = Rect.fromCircle(center: center, radius: radius);
 
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius - 10),
-        startAngle,
-        sweepAngle,
-        true,
-        segmentPaint,
-      );
-
-      // Add 3D shadow effect
-      final shadowPaint = Paint()
-        ..color = Colors.black.withOpacity(0.3)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2;
-
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius - 10),
-        startAngle,
-        sweepAngle,
-        true,
-        shadowPaint,
-      );
-
-      // Draw prize text with better styling
-      final textAngle = startAngle + sweepAngle / 2;
-      final textRadius = radius * 0.7;
-      final textX = center.dx + textRadius * cos(textAngle);
-      final textY = center.dy + textRadius * sin(textAngle);
-
-      final textSpan = TextSpan(
-        text: prizes[i]['label'].toString(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          shadows: [
-            Shadow(color: Colors.black, blurRadius: 4, offset: Offset(2, 2)),
+      // Gradient for depth
+      final paint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            wheelColors[i % wheelColors.length].withOpacity(0.95),
+            wheelColors[i % wheelColors.length].withOpacity(0.75),
           ],
-        ),
-      );
+        ).createShader(rect);
+
+      canvas.drawArc(rect, startAngle, segmentAngle, true, paint);
+
+      // Divider line
+      final borderPaint = Paint()
+        ..color = Colors.white.withOpacity(0.4)
+        ..strokeWidth = 2
+        ..style = PaintingStyle.stroke;
+
+      canvas.drawArc(rect, startAngle, segmentAngle, true, borderPaint);
+
+      // Text
+      final textAngle = startAngle + segmentAngle / 2;
+      final textRadius = radius * 0.65;
 
       final textPainter = TextPainter(
-        text: textSpan,
+        text: TextSpan(
+          text: prizes[i]['label'].toString(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(color: Colors.black, blurRadius: 4),
+            ],
+          ),
+        ),
         textDirection: TextDirection.ltr,
       )..layout();
 
-      final textOffset = Offset(
-        textX - textPainter.width / 2,
-        textY - textPainter.height / 2,
-      );
-
       canvas.save();
-      canvas.translate(textOffset.dx, textOffset.dy);
+      canvas.translate(
+        center.dx + cos(textAngle) * textRadius,
+        center.dy + sin(textAngle) * textRadius,
+      );
       canvas.rotate(textAngle + pi / 2);
-      textPainter.paint(canvas, Offset.zero);
+      textPainter.paint(
+        canvas,
+        Offset(-textPainter.width / 2, -textPainter.height / 2),
+      );
       canvas.restore();
-
-      // Add small decorative dots between segments
-      final dotAngle = startAngle + sweepAngle;
-      final dotX = center.dx + (radius - 5) * cos(dotAngle);
-      final dotY = center.dy + (radius - 5) * sin(dotAngle);
-      
-      final dotPaint = Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.fill;
-      
-      canvas.drawCircle(Offset(dotX, dotY), 3, dotPaint);
     }
-
-    // Draw inner metallic ring
-    final innerRingPaint = Paint()
-      ..shader = const RadialGradient(
-        colors: [
-          Color(0xFFFFD700),
-          Color(0xFFB8860B),
-          Color(0xFFFFD700),
-        ],
-      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.3))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-
-    canvas.drawCircle(center, radius * 0.3, innerRingPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
 class _TrianglePointerPainter extends CustomPainter {
@@ -800,12 +696,13 @@ class _TrianglePointerPainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
-    final path = Path();
-    path.moveTo(size.width / 2, 0);
-    path.lineTo(0, size.height);
-    path.lineTo(size.width, size.height);
-    path.close();
+    final path = Path()
+      ..moveTo(size.width / 2, 0)
+      ..lineTo(0, size.height)
+      ..lineTo(size.width, size.height)
+      ..close();
 
+    canvas.drawShadow(path, Colors.black, 4, true);
     canvas.drawPath(path, paint);
 
     // Add shine effect
@@ -813,16 +710,16 @@ class _TrianglePointerPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.3)
       ..style = PaintingStyle.fill;
 
-    final shinePath = Path();
-    shinePath.moveTo(size.width * 0.3, size.height * 0.3);
-    shinePath.lineTo(size.width * 0.7, size.height * 0.3);
-    shinePath.lineTo(size.width * 0.6, size.height * 0.7);
-    shinePath.lineTo(size.width * 0.4, size.height * 0.7);
-    shinePath.close();
+    final shinePath = Path()
+      ..moveTo(size.width * 0.3, size.height * 0.3)
+      ..lineTo(size.width * 0.7, size.height * 0.3)
+      ..lineTo(size.width * 0.6, size.height * 0.7)
+      ..lineTo(size.width * 0.4, size.height * 0.7)
+      ..close();
 
     canvas.drawPath(shinePath, shinePaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
