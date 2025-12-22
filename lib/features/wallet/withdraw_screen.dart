@@ -86,8 +86,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     if (amount == null || amount < 100) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Minimum withdrawal is ₹100"),
+        SnackBar(
+          content: build3DText(
+            "Minimum withdrawal is ₹100",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
           backgroundColor: Colors.orange,
         )
       );
@@ -98,7 +103,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text("Insufficient funds. Your balance is ₹${userBalance.toStringAsFixed(2)}"),
+          content: build3DText(
+            "Insufficient funds. Your balance is ₹${userBalance.toStringAsFixed(2)}",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
         )
       );
       return;
@@ -106,8 +116,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
     if (upi.isEmpty || !upi.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Invalid UPI ID"),
+        SnackBar(
+          content: build3DText(
+            "Invalid UPI ID",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
           backgroundColor: Colors.orange,
         )
       );
@@ -127,9 +142,14 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: primaryGreen,
-            content: Text("Withdrawal Requested Successfully!"),
+            content: build3DText(
+              "Withdrawal Requested Successfully!",
+              fontSize: 14,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
+            ),
           )
         );
         _amountController.clear();
@@ -141,7 +161,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text("Error: ${e.toString().contains('Insufficient') ? 'Insufficient Funds' : 'Request Failed'}"),
+          content: build3DText(
+            "Error: ${e.toString().contains('Insufficient') ? 'Insufficient Funds' : 'Request Failed'}",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
         )
       );
     } finally {
@@ -194,17 +219,20 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        icon: build3DIcon(
+                          Icons.arrow_back,
+                          size: 28,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                        ),
                       ),
                       Expanded(
-                        child: Text(
+                        child: build3DText(
                           "Withdraw Funds",
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
+                          fontSize: 20,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(width: 48),
@@ -230,29 +258,27 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     ),
                     child: Column(
                       children: [
-                        Text(
+                        build3DText(
                           "Available Balance",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700],
-                            fontSize: 16,
-                          ),
+                          fontSize: 16,
+                          mainColor: Colors.grey[700]!,
+                          shadowColor: Colors.black54,
                         ),
                         const SizedBox(height: 10),
-                        Text(
+                        build3DText(
                           "₹${userBalance.toStringAsFixed(2)}",
-                          style: GoogleFonts.poppins(
-                            color: primaryGreen,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          fontSize: 32,
+                          mainColor: primaryGreen,
+                          shadowColor: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          depth: 3,
                         ),
                         const SizedBox(height: 10),
-                        Text(
+                        build3DText(
                           "Minimum withdrawal: ₹100",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
+                          fontSize: 12,
+                          mainColor: Colors.grey[600]!,
+                          shadowColor: Colors.black54,
                         ),
                       ],
                     ),
@@ -277,12 +303,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        build3DText(
                           "UPI ID",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.w500,
-                          ),
+                          fontSize: 14,
+                          mainColor: Colors.grey[700]!,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.w500,
                         ),
                         const SizedBox(height: 8),
                         TextField(
@@ -292,12 +318,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                         ),
                         const SizedBox(height: 20),
                         
-                        Text(
+                        build3DText(
                           "Amount (₹)",
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700],
-                            fontWeight: FontWeight.w500,
-                          ),
+                          fontSize: 14,
+                          mainColor: Colors.grey[700]!,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.w500,
                         ),
                         const SizedBox(height: 8),
                         TextField(
@@ -329,13 +355,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : Text(
+                                : build3DText(
                                     "WITHDRAW NOW",
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
+                                    fontSize: 16,
+                                    mainColor: Colors.white,
+                                    shadowColor: Colors.black54,
+                                    fontWeight: FontWeight.bold,
                                   ),
                           ),
                         ),
@@ -346,20 +371,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   const SizedBox(height: 30),
 
                   // Transaction History
-                  Text(
+                  build3DText(
                     "Transaction History",
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
+                    fontSize: 18,
+                    mainColor: Colors.white,
+                    shadowColor: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    depth: 2,
                   ),
                   const SizedBox(height: 15),
 
@@ -376,17 +394,18 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                               ),
                               child: Column(
                                 children: [
-                                  const Icon(
+                                  build3DIcon(
                                     Icons.history,
-                                    color: Colors.white54,
                                     size: 50,
+                                    mainColor: Colors.white54,
+                                    shadowColor: Colors.black54,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
+                                  build3DText(
                                     "No withdrawal history",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white54,
-                                    ),
+                                    fontSize: 14,
+                                    mainColor: Colors.white54,
+                                    shadowColor: Colors.black54,
                                   ),
                                 ],
                               ),
@@ -412,25 +431,25 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                       color: _getStatusColor(item['status']).withOpacity(0.1),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(
+                                    child: build3DIcon(
                                       _getStatusIcon(item['status']),
-                                      color: _getStatusColor(item['status']),
                                       size: 20,
+                                      mainColor: _getStatusColor(item['status']),
+                                      shadowColor: Colors.black54,
                                     ),
                                   ),
-                                  title: Text(
+                                  title: build3DText(
                                     "₹${item['amount']}",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    fontSize: 16,
+                                    mainColor: Colors.black87,
+                                    shadowColor: Colors.black54,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  subtitle: Text(
+                                  subtitle: build3DText(
                                     item['upi_id'],
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                    ),
+                                    fontSize: 12,
+                                    mainColor: Colors.grey[600]!,
+                                    shadowColor: Colors.black54,
                                   ),
                                   trailing: Container(
                                     padding: const EdgeInsets.symmetric(
@@ -441,13 +460,12 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                                       color: _getStatusColor(item['status']).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Text(
+                                    child: build3DText(
                                       item['status'].toString().toUpperCase(),
-                                      style: GoogleFonts.poppins(
-                                        color: _getStatusColor(item['status']),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      fontSize: 10,
+                                      mainColor: _getStatusColor(item['status']),
+                                      shadowColor: Colors.black54,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
@@ -492,5 +510,75 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
       case 'rejected': return Icons.cancel;
       default: return Icons.help_outline;
     }
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
+    );
   }
 }

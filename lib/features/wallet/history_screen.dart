@@ -158,17 +158,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        icon: build3DIcon(
+                          Icons.arrow_back,
+                          size: 28,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                        ),
                       ),
                       Expanded(
-                        child: Text(
+                        child: build3DText(
                           "Transaction History",
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
+                          fontSize: 20,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       IconButton(
@@ -185,7 +188,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.refresh, color: Colors.white),
+                            : build3DIcon(
+                                Icons.refresh,
+                                size: 28,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                              ),
                       ),
                     ],
                   ),
@@ -193,34 +201,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
                 Expanded(
                   child: isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(color: Colors.white),
+                              const SizedBox(height: 20),
+                              build3DText(
+                                "Loading transactions...",
+                                fontSize: 16,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                              ),
+                            ],
+                          ),
                         )
                       : allTransactions.isEmpty
                           ? Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
+                                  build3DIcon(
                                     Icons.history,
-                                    color: Colors.white54,
                                     size: 64,
+                                    mainColor: Colors.white54,
+                                    shadowColor: Colors.black54,
                                   ),
                                   const SizedBox(height: 20),
-                                  Text(
+                                  build3DText(
                                     "No transactions yet",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white54,
-                                      fontSize: 18,
-                                    ),
+                                    fontSize: 18,
+                                    mainColor: Colors.white54,
+                                    shadowColor: Colors.black54,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
+                                  build3DText(
                                     "Your transaction history will appear here",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white38,
-                                      fontSize: 14,
-                                    ),
+                                    fontSize: 14,
+                                    mainColor: Colors.white38,
+                                    shadowColor: Colors.black54,
                                   ),
                                 ],
                               ),
@@ -277,10 +296,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   : Colors.orange.withOpacity(0.1),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: Icon(
+                                            child: build3DIcon(
                                               item['icon'],
-                                              color: isIncome ? primaryGreen : Colors.orange,
                                               size: 22,
+                                              mainColor: isIncome ? primaryGreen : Colors.orange,
+                                              shadowColor: Colors.black54,
                                             ),
                                           ),
                                           const SizedBox(width: 15),
@@ -290,21 +310,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Text(
+                                                build3DText(
                                                   item['title'],
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.black87,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                  ),
+                                                  fontSize: 16,
+                                                  mainColor: Colors.black87,
+                                                  shadowColor: Colors.black54,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                                 const SizedBox(height: 4),
-                                                Text(
+                                                build3DText(
                                                   _formatDate(item['date']),
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 12,
-                                                  ),
+                                                  fontSize: 12,
+                                                  mainColor: Colors.grey[600]!,
+                                                  shadowColor: Colors.black54,
                                                 ),
                                               ],
                                             ),
@@ -314,13 +332,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.end,
                                             children: [
-                                              Text(
+                                              build3DText(
                                                 "${isIncome ? '+' : '-'}₹${item['amount'].toStringAsFixed(2)}",
-                                                style: GoogleFonts.poppins(
-                                                  color: isIncome ? primaryGreen : Colors.orange,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                ),
+                                                fontSize: 16,
+                                                mainColor: isIncome ? primaryGreen : Colors.orange,
+                                                shadowColor: Colors.black54,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                               const SizedBox(height: 4),
                                               Container(
@@ -332,13 +349,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   color: statusColor.withOpacity(0.1),
                                                   borderRadius: BorderRadius.circular(8),
                                                 ),
-                                                child: Text(
+                                                child: build3DText(
                                                   item['status'].toString().toUpperCase(),
-                                                  style: GoogleFonts.poppins(
-                                                    color: statusColor,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                  fontSize: 10,
+                                                  mainColor: statusColor,
+                                                  shadowColor: Colors.black54,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                             ],
@@ -356,6 +372,76 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -85,8 +85,13 @@ class _InviteScreenState extends State<InviteScreen> {
     
     Clipboard.setData(ClipboardData(text: myInviteCode));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Code Copied!"), 
+      SnackBar(
+        content: build3DText(
+          "Code Copied!",
+          fontSize: 14,
+          mainColor: Colors.white,
+          shadowColor: Colors.black54,
+        ), 
         backgroundColor: Colors.green
       ),
     );
@@ -98,8 +103,13 @@ class _InviteScreenState extends State<InviteScreen> {
     String fullLink = "$shareUrl?ref=$myInviteCode";
     Clipboard.setData(ClipboardData(text: fullLink));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Link Copied!"), 
+      SnackBar(
+        content: build3DText(
+          "Link Copied!",
+          fontSize: 14,
+          mainColor: Colors.white,
+          shadowColor: Colors.black54,
+        ), 
         backgroundColor: Colors.green
       ),
     );
@@ -126,9 +136,11 @@ class _InviteScreenState extends State<InviteScreen> {
             children: [
               const CircularProgressIndicator(color: Colors.white),
               const SizedBox(height: 20),
-              Text(
+              build3DText(
                 'Loading your invite code...', 
-                style: GoogleFonts.poppins(color: Colors.white)
+                fontSize: 16,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
               ),
             ],
           ),
@@ -144,17 +156,28 @@ class _InviteScreenState extends State<InviteScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 50),
+              build3DIcon(
+                Icons.error_outline,
+                size: 50,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
+              ),
               const SizedBox(height: 20),
-              Text(
+              build3DText(
                 _errorMessage,
-                style: GoogleFonts.poppins(color: Colors.white, fontSize: 16),
-                textAlign: TextAlign.center,
+                fontSize: 16,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _loadInviteCode,
-                child: const Text('Retry'),
+                child: build3DText(
+                  'Retry',
+                  fontSize: 16,
+                  mainColor: Colors.white,
+                  shadowColor: Colors.black54,
+                ),
               ),
             ],
           ),
@@ -165,14 +188,26 @@ class _InviteScreenState extends State<InviteScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: _build3DTitle("Refer & Earn"),
+        title: build3DText(
+          "Refer & Earn",
+          fontSize: 24,
+          mainColor: AppColors.yellow,
+          shadowColor: AppColors.darkGreenShadow,
+          fontWeight: FontWeight.bold,
+          depth: 3,
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.leaderboard, color: Colors.yellow, size: 30),
+            icon: build3DIcon(
+              Icons.leaderboard,
+              size: 30,
+              mainColor: Colors.yellow,
+              shadowColor: Colors.black54,
+            ),
             onPressed: () => showDialog(
               context: context, 
               builder: (_) => const LeaderboardDialog()
@@ -236,20 +271,25 @@ class _InviteScreenState extends State<InviteScreen> {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.stars, size: 50, color: Colors.white),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Invite Friends & Earn", 
-                          style: GoogleFonts.poppins(
-                            fontSize: 22, 
-                            fontWeight: FontWeight.bold, 
-                            color: Colors.white, 
-                            shadows: [const Shadow(color: Colors.black26, blurRadius: 4)]
-                          )
+                        build3DIcon(
+                          Icons.stars,
+                          size: 50,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
-                        Text(
+                        const SizedBox(height: 10),
+                        build3DText(
+                          "Invite Friends & Earn", 
+                          fontSize: 22,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        build3DText(
                           "Get ₹30 + 10% Commission", 
-                          style: GoogleFonts.poppins(fontSize: 14, color: Colors.white)
+                          fontSize: 14,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
                       ],
                     ),
@@ -275,12 +315,12 @@ class _InviteScreenState extends State<InviteScreen> {
                         const SizedBox(height: 20),
                         
                         // Code Display
-                        Text(
+                        build3DText(
                           "Your Referral Code", 
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey[700], 
-                            fontWeight: FontWeight.bold
-                          )
+                          fontSize: 16,
+                          mainColor: Colors.grey[700]!,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 10),
                         GestureDetector(
@@ -296,17 +336,20 @@ class _InviteScreenState extends State<InviteScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
+                                build3DText(
                                   myInviteCode, 
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 24, 
-                                    fontWeight: FontWeight.bold, 
-                                    color: AppColors.primaryGreen, 
-                                    letterSpacing: 3
-                                  )
+                                  fontSize: 24,
+                                  mainColor: AppColors.primaryGreen,
+                                  shadowColor: Colors.black54,
+                                  fontWeight: FontWeight.bold,
                                 ),
                                 const SizedBox(width: 15),
-                                const Icon(Icons.copy, color: AppColors.primaryGreen),
+                                build3DIcon(
+                                  Icons.copy,
+                                  size: 24,
+                                  mainColor: AppColors.primaryGreen,
+                                  shadowColor: Colors.black54,
+                                ),
                               ],
                             ),
                           ),
@@ -348,10 +391,18 @@ class _InviteScreenState extends State<InviteScreen> {
                                     _isCopyLinkPressed = isHovering;
                                   });
                                 },
-                                icon: const Icon(Icons.link, color: Colors.black87),
-                                label: const Text(
+                                icon: build3DIcon(
+                                  Icons.link,
+                                  size: 24,
+                                  mainColor: Colors.black87,
+                                  shadowColor: Colors.black54,
+                                ),
+                                label: build3DText(
                                   "Copy Link", 
-                                  style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)
+                                  fontSize: 16,
+                                  mainColor: Colors.black87,
+                                  shadowColor: Colors.black54,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -386,10 +437,18 @@ class _InviteScreenState extends State<InviteScreen> {
                                     _isInvitePressed = isHovering;
                                   });
                                 },
-                                icon: const Icon(Icons.share, color: Colors.white),
-                                label: const Text(
+                                icon: build3DIcon(
+                                  Icons.share,
+                                  size: 24,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black54,
+                                ),
+                                label: build3DText(
                                   "INVITE NOW", 
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                                  fontSize: 16,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black54,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -406,9 +465,20 @@ class _InviteScreenState extends State<InviteScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Row(
                       children: [
-                        const Icon(Icons.group_add, color: Colors.white, size: 28),
+                        build3DIcon(
+                          Icons.group_add,
+                          size: 28,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                        ),
                         const SizedBox(width: 10),
-                        _build3DTitle("My Team"),
+                        build3DText(
+                          "My Team",
+                          fontSize: 20,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -416,13 +486,12 @@ class _InviteScreenState extends State<InviteScreen> {
                             color: Colors.white, 
                             borderRadius: BorderRadius.circular(15)
                           ),
-                          child: Text(
+                          child: build3DText(
                             "10% Comm.", 
-                            style: GoogleFonts.poppins(
-                              fontSize: 12, 
-                              fontWeight: FontWeight.bold, 
-                              color: AppColors.primaryGreen
-                            )
+                            fontSize: 12,
+                            mainColor: AppColors.primaryGreen,
+                            shadowColor: Colors.black54,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -453,30 +522,70 @@ class _InviteScreenState extends State<InviteScreen> {
     );
   }
 
-  // --- HELPER: 3D TEXT STYLE ---
-  Widget _build3DTitle(String text) {
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
     return Stack(
       children: [
-        // Shadow
+        // Shadow text
         Text(
           text,
           style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
-            color: AppColors.darkGreenShadow,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
           ),
         ),
-        // Main Text
+
+        // Front text
         Transform.translate(
-          offset: const Offset(0, -2),
+          offset: Offset(0, -depth),
           child: Text(
             text,
             style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-              color: AppColors.yellow,
-              shadows: [const Shadow(color: Colors.black12, blurRadius: 2)]
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
           ),
         ),
       ],

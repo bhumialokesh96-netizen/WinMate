@@ -117,22 +117,20 @@ class _HomeDashboardState extends State<HomeDashboard> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  build3DText(
                                     "Welcome,",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      color: Colors.white.withOpacity(0.8),
-                                    ),
+                                    fontSize: 18,
+                                    mainColor: Colors.yellow,
+                                    shadowColor: const Color(0xFF004D40),
+                                    depth: 2,
                                   ),
-                                  Text(
+                                  const SizedBox(height: 4),
+                                  build3DText(
                                     userPhone,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    fontSize: 16,
+                                    mainColor: Colors.white,
+                                    shadowColor: Colors.black54,
+                                    depth: 1.5,
                                   ),
                                 ],
                               ),
@@ -151,9 +149,11 @@ class _HomeDashboardState extends State<HomeDashboard> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Icon(
+                                  : build3DIcon(
                                       Icons.refresh,
-                                      color: Colors.white,
+                                      size: 28,
+                                      mainColor: Colors.white,
+                                      shadowColor: Colors.black54,
                                     ),
                             ),
                           ],
@@ -186,28 +186,21 @@ class _HomeDashboardState extends State<HomeDashboard> {
                           ),
                           child: Column(
                             children: [
-                              Text(
+                              build3DText(
                                 "Current Balance",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
+                                fontSize: 14,
+                                mainColor: Colors.white.withOpacity(0.9),
+                                shadowColor: Colors.black54,
+                                depth: 1.5,
                               ),
                               const SizedBox(height: 10),
-                              Text(
+                              build3DText(
                                 "₹${balance.toStringAsFixed(2)}",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 42,
-                                  fontWeight: FontWeight.bold,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
+                                fontSize: 42,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black,
+                                depth: 3,
+                                fontWeight: FontWeight.bold,
                               ),
                               const SizedBox(height: 15),
                               Container(
@@ -220,18 +213,19 @@ class _HomeDashboardState extends State<HomeDashboard> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    build3DIcon(
                                       Icons.send,
-                                      color: Colors.white,
                                       size: 16,
+                                      mainColor: Colors.white,
+                                      shadowColor: Colors.black54,
                                     ),
                                     const SizedBox(width: 5),
-                                    Text(
+                                    build3DText(
                                       "Total SMS Sent: $totalSms",
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
+                                      fontSize: 13,
+                                      mainColor: Colors.white,
+                                      shadowColor: Colors.black54,
+                                      depth: 1,
                                     ),
                                   ],
                                 ),
@@ -252,9 +246,13 @@ class _HomeDashboardState extends State<HomeDashboard> {
                               "Deposit",
                               () {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        "Please contact Admin to Deposit funds."),
+                                  SnackBar(
+                                    content: build3DText(
+                                      "Please contact Admin to Deposit funds.",
+                                      fontSize: 14,
+                                      mainColor: Colors.white,
+                                      shadowColor: Colors.black54,
+                                    ),
                                     backgroundColor: primaryGreen,
                                   ),
                                 );
@@ -297,6 +295,74 @@ class _HomeDashboardState extends State<HomeDashboard> {
     );
   }
 
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.w900,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionBtn(IconData icon, String label, VoidCallback onTap) {
     return Column(
       children: [
@@ -316,21 +382,23 @@ class _HomeDashboardState extends State<HomeDashboard> {
                 ),
               ],
             ),
-            child: Icon(
+            child: build3DIcon(
               icon,
-              color: primaryGreen,
               size: 32,
+              mainColor: primaryGreen,
+              shadowColor: Colors.black54,
+              depth: 2,
             ),
           ),
         ),
         const SizedBox(height: 10),
-        Text(
+        build3DText(
           label,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          fontSize: 14,
+          mainColor: Colors.white,
+          shadowColor: Colors.black54,
+          depth: 1.5,
+          fontWeight: FontWeight.w500,
         ),
       ],
     );

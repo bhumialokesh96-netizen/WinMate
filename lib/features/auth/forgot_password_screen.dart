@@ -104,7 +104,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void _showMessage(String msg, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg), 
+        content: build3DText(
+          msg,
+          fontSize: 14,
+          mainColor: Colors.white,
+          shadowColor: Colors.black54,
+        ), 
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
       ),
@@ -155,17 +160,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        icon: build3DIcon(
+                          Icons.arrow_back,
+                          size: 28,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                        ),
                       ),
                       Expanded(
-                        child: Text(
+                        child: build3DText(
                           "Reset Password",
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
+                          fontSize: 20,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(width: 48), // Balance the back button space
@@ -194,50 +202,42 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: build3DIcon(
                               Icons.lock_reset,
                               size: 50,
-                              color: primaryGreen,
+                              mainColor: primaryGreen,
+                              shadowColor: Colors.black54,
                             ),
                           ),
                           
                           const SizedBox(height: 30),
                           
                           // Dynamic Title
-                          Text(
+                          build3DText(
                             _currentStep == 0 
                                 ? "Reset Password" 
                                 : _currentStep == 1 
                                     ? "Enter Verification Code" 
                                     : "Create New Password",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
+                            fontSize: 24,
+                            mainColor: Colors.white,
+                            shadowColor: Colors.black54,
+                            fontWeight: FontWeight.bold,
+                            depth: 3,
                           ),
                           
                           const SizedBox(height: 10),
                           
                           // Subtitle
-                          Text(
+                          build3DText(
                             _currentStep == 0 
                                 ? "Enter your email to receive a verification code"
                                 : _currentStep == 1 
                                     ? "Enter the 6-digit code sent to your email"
                                     : "Create a strong new password for your account",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                            ),
-                            textAlign: TextAlign.center,
+                            fontSize: 14,
+                            mainColor: Colors.white.withOpacity(0.9),
+                            shadowColor: Colors.black54,
                           ),
                           
                           const SizedBox(height: 40),
@@ -262,12 +262,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Text(
+                              child: build3DText(
                                 "Sent to: ${_emailController.text}",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                fontSize: 14,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 20),
@@ -343,12 +343,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       style: const TextStyle(color: Colors.black87),
       textAlign: isOtp ? TextAlign.center : TextAlign.left,
       decoration: InputDecoration(
-        prefixIcon: isOtp ? null : Icon(icon, color: Colors.grey),
+        prefixIcon: isOtp ? null : build3DIcon(
+          icon,
+          size: 20,
+          mainColor: Colors.grey,
+          shadowColor: Colors.black54,
+        ),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(
+                icon: build3DIcon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey,
+                  size: 20,
+                  mainColor: Colors.grey,
+                  shadowColor: Colors.black54,
                 ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
@@ -387,15 +394,84 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 height: 20,
                 child: CircularProgressIndicator(color: Colors.white),
               )
-            : Text(
+            : build3DText(
                 text,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                fontSize: 16,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
+                fontWeight: FontWeight.bold,
               ),
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

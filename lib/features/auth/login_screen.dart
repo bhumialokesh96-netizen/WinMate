@@ -27,8 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() async {
     if (_emailController.text.isEmpty || _passController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please fill in all fields"),
+        SnackBar(
+          content: build3DText(
+            "Please fill in all fields",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -55,15 +60,25 @@ class _LoginScreenState extends State<LoginScreen> {
           _showOtpDialog(_emailController.text.trim());
         } else if (errorMsg.contains("Invalid login credentials")) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Invalid email or password"),
+            SnackBar(
+              content: build3DText(
+                "Invalid email or password",
+                fontSize: 14,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
+              ),
               backgroundColor: Colors.red,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Login Failed: ${errorMsg.split('\n')[0]}"),
+              content: build3DText(
+                "Login Failed: ${errorMsg.split('\n')[0]}",
+                fontSize: 14,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -81,19 +96,21 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: build3DText(
           "Verification Needed",
-          style: GoogleFonts.poppins(
-            color: primaryGreen,
-            fontWeight: FontWeight.bold,
-          ),
+          fontSize: 20,
+          mainColor: primaryGreen,
+          shadowColor: Colors.black54,
+          fontWeight: FontWeight.bold,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            build3DText(
               "Your email is not verified. Enter the code sent to $email",
-              style: GoogleFonts.poppins(color: Colors.grey[700]),
+              fontSize: 16,
+              mainColor: Colors.grey[700]!,
+              shadowColor: Colors.black54,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -117,9 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
+            child: build3DText(
               "Cancel",
-              style: GoogleFonts.poppins(color: Colors.grey),
+              fontSize: 16,
+              mainColor: Colors.grey,
+              shadowColor: Colors.black54,
             ),
           ),
           ElevatedButton(
@@ -140,16 +159,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Invalid verification code"),
+                  SnackBar(
+                    content: build3DText(
+                      "Invalid verification code",
+                      fontSize: 14,
+                      mainColor: Colors.white,
+                      shadowColor: Colors.black54,
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
               }
             },
-            child: Text(
+            child: build3DText(
               "Verify",
-              style: GoogleFonts.poppins(color: Colors.white),
+              fontSize: 16,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
             ),
           ),
         ],
@@ -215,39 +241,32 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: build3DIcon(
                         Icons.account_balance_wallet,
                         size: 50,
-                        color: primaryGreen,
+                        mainColor: primaryGreen,
+                        shadowColor: Colors.black54,
                       ),
                     ),
                     
                     const SizedBox(height: 30),
                     
-                    Text(
+                    build3DText(
                       "Welcome Back!",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                      fontSize: 28,
+                      mainColor: Colors.white,
+                      shadowColor: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                      depth: 3,
                     ),
                     
                     const SizedBox(height: 10),
                     
-                    Text(
+                    build3DText(
                       "Sign in to your account",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
-                      ),
+                      fontSize: 16,
+                      mainColor: Colors.white.withOpacity(0.9),
+                      shadowColor: Colors.black54,
                     ),
                     
                     const SizedBox(height: 40),
@@ -260,7 +279,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: "Email Address",
                         labelStyle: GoogleFonts.poppins(color: Colors.grey[700]),
-                        prefixIcon: const Icon(Icons.email, color: Colors.grey),
+                        prefixIcon: build3DIcon(
+                          Icons.email,
+                          size: 20,
+                          mainColor: Colors.grey,
+                          shadowColor: Colors.black54,
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -281,11 +305,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: "Password",
                         labelStyle: GoogleFonts.poppins(color: Colors.grey[700]),
-                        prefixIcon: const Icon(Icons.lock, color: Colors.grey),
+                        prefixIcon: build3DIcon(
+                          Icons.lock,
+                          size: 20,
+                          mainColor: Colors.grey,
+                          shadowColor: Colors.black54,
+                        ),
                         suffixIcon: IconButton(
-                          icon: Icon(
+                          icon: build3DIcon(
                             _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                            color: Colors.grey,
+                            size: 20,
+                            mainColor: Colors.grey,
+                            shadowColor: Colors.black54,
                           ),
                           onPressed: () {
                             setState(() => _obscurePassword = !_obscurePassword);
@@ -306,12 +337,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                        child: Text(
+                        child: build3DText(
                           "Forgot Password?",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          fontSize: 14,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -336,13 +367,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(color: Colors.white),
                               )
-                            : Text(
+                            : build3DText(
                                 "LOGIN",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                fontSize: 16,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                                fontWeight: FontWeight.bold,
                               ),
                       ),
                     ),
@@ -353,19 +383,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        build3DText(
                           "Don't have an account? ",
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          fontSize: 14,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
                         GestureDetector(
                           onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                          child: Text(
+                          child: build3DText(
                             "Register",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                            ),
+                            fontSize: 14,
+                            mainColor: Colors.white,
+                            shadowColor: Colors.black54,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -377,6 +408,76 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

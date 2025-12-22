@@ -15,6 +15,11 @@ class _TeamListState extends State<TeamList> {
   List<InviteTreeModel> team = [];
   bool isLoading = true;
 
+  // Color constants for the green theme
+  static const primaryGreen = Color(0xFF00C853);
+  static const lightGreen = Color(0xFFE8F5E9);
+  static const accentOrange = Color(0xFFFF9100);
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +66,23 @@ class _TeamListState extends State<TeamList> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Center(child: CircularProgressIndicator(color: Color(0xFFE94560)));
+    if (isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: primaryGreen),
+            const SizedBox(height: 20),
+            build3DText(
+              "Loading team members...",
+              fontSize: 16,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
+            ),
+          ],
+        ),
+      );
+    }
     
     if (team.isEmpty) {
       return Container(
@@ -69,9 +90,19 @@ class _TeamListState extends State<TeamList> {
         child: Center(
           child: Column(
             children: [
-              const Icon(Icons.person_off, color: Colors.grey, size: 40),
+              build3DIcon(
+                Icons.person_off,
+                size: 40,
+                mainColor: Colors.white54,
+                shadowColor: Colors.black54,
+              ),
               const SizedBox(height: 10),
-              Text("No team members yet.", style: GoogleFonts.poppins(color: Colors.white54)),
+              build3DText(
+                "No team members yet.",
+                fontSize: 16,
+                mainColor: Colors.white54,
+                shadowColor: Colors.black54,
+              ),
             ],
           ),
         ),
@@ -84,27 +115,149 @@ class _TeamListState extends State<TeamList> {
       itemCount: team.length,
       itemBuilder: (context, index) {
         final member = team[index];
-        return Card(
-          color: const Color(0xFF16213E),
+        return Container(
           margin: const EdgeInsets.only(bottom: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: const Color(0xFFE94560),
-              child: const Icon(Icons.person, color: Colors.white),
-            ),
-            title: Text(
-              _maskPhone(member.displayPhone), 
-              style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold)
-            ),
-            subtitle: Text(
-              "Joined: ${member.joinedAt.toString().split(' ')[0]}", 
-              style: GoogleFonts.poppins(color: Colors.grey, fontSize: 12)
-            ),
-            trailing: const Icon(Icons.verified, color: Colors.green, size: 16),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Avatar
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primaryGreen.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: build3DIcon(
+                  Icons.person,
+                  size: 20,
+                  mainColor: primaryGreen,
+                  shadowColor: Colors.black54,
+                ),
+              ),
+              const SizedBox(width: 15),
+              
+              // Member Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    build3DText(
+                      _maskPhone(member.displayPhone),
+                      fontSize: 16,
+                      mainColor: const Color(0xFF333333),
+                      shadowColor: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 4),
+                    build3DText(
+                      "Joined: ${member.joinedAt.toString().split(' ')[0]}",
+                      fontSize: 12,
+                      mainColor: const Color(0xFF666666),
+                      shadowColor: Colors.black54,
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Verified Badge
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: primaryGreen.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: build3DIcon(
+                  Icons.verified,
+                  size: 16,
+                  mainColor: primaryGreen,
+                  shadowColor: Colors.black54,
+                ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

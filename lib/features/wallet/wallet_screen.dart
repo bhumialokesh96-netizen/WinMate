@@ -117,14 +117,12 @@ class _WalletScreenState extends State<WalletScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: build3DText(
                             "My Wallet",
-                            style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
+                            fontSize: 24,
+                            mainColor: Colors.white,
+                            shadowColor: Colors.black54,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         IconButton(
@@ -137,7 +135,12 @@ class _WalletScreenState extends State<WalletScreen> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Icon(Icons.refresh, color: Colors.white),
+                              : build3DIcon(
+                                  Icons.refresh,
+                                  size: 28,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black54,
+                                ),
                           onPressed: () {
                             setState(() => _isRefreshing = true);
                             _fetchWalletData();
@@ -174,12 +177,11 @@ class _WalletScreenState extends State<WalletScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          build3DText(
                             "Total Balance",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 16,
-                            ),
+                            fontSize: 16,
+                            mainColor: Colors.white.withOpacity(0.9),
+                            shadowColor: Colors.black54,
                           ),
                           const SizedBox(height: 10),
                           isLoading 
@@ -191,20 +193,13 @@ class _WalletScreenState extends State<WalletScreen> {
                                     strokeWidth: 3,
                                   ),
                                 )
-                              : Text(
-                                  "₹${balance.toStringAsFixed(2)}", 
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 42,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
+                              : build3DText(
+                                  "₹${balance.toStringAsFixed(2)}",
+                                  fontSize: 42,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  depth: 3,
                                 ),
                           const SizedBox(height: 20),
                           Row(
@@ -215,19 +210,19 @@ class _WalletScreenState extends State<WalletScreen> {
                                   color: Colors.white.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: build3DIcon(
                                   Icons.security,
-                                  color: Colors.white,
                                   size: 16,
+                                  mainColor: Colors.white,
+                                  shadowColor: Colors.black54,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
+                              build3DText(
                                 "Secure Payments",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
+                                fontSize: 14,
+                                mainColor: Colors.white.withOpacity(0.9),
+                                shadowColor: Colors.black54,
                               ),
                             ],
                           ),
@@ -258,18 +253,18 @@ class _WalletScreenState extends State<WalletScreen> {
                             MaterialPageRoute(builder: (_) => const WithdrawScreen()),
                           );
                         },
-                        icon: const Icon(
+                        icon: build3DIcon(
                           Icons.arrow_upward,
-                          color: Colors.white,
                           size: 24,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
-                        label: Text(
+                        label: build3DText(
                           "Withdraw Funds",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          fontSize: 16,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accentOrange,
@@ -309,20 +304,20 @@ class _WalletScreenState extends State<WalletScreen> {
                                   color: primaryGreen.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: build3DIcon(
                                   Icons.trending_up,
-                                  color: primaryGreen,
                                   size: 20,
+                                  mainColor: primaryGreen,
+                                  shadowColor: Colors.black54,
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Text(
+                              build3DText(
                                 "Recent Income",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.black87,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                fontSize: 18,
+                                mainColor: Colors.black87,
+                                shadowColor: Colors.black54,
+                                fontWeight: FontWeight.bold,
                               ),
                             ],
                           ),
@@ -337,26 +332,25 @@ class _WalletScreenState extends State<WalletScreen> {
                               ),
                               child: Column(
                                 children: [
-                                  const Icon(
+                                  build3DIcon(
                                     Icons.account_balance_wallet,
-                                    color: Colors.grey,
                                     size: 50,
+                                    mainColor: Colors.grey,
+                                    shadowColor: Colors.black54,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
+                                  build3DText(
                                     "No income yet",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey[600],
-                                      fontSize: 16,
-                                    ),
+                                    fontSize: 16,
+                                    mainColor: Colors.grey[600]!,
+                                    shadowColor: Colors.black54,
                                   ),
                                   const SizedBox(height: 5),
-                                  Text(
+                                  build3DText(
                                     "Start mining to earn rewards!",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.grey[500],
-                                      fontSize: 12,
-                                    ),
+                                    fontSize: 12,
+                                    mainColor: Colors.grey[500]!,
+                                    shadowColor: Colors.black54,
                                   ),
                                 ],
                               ),
@@ -397,41 +391,40 @@ class _WalletScreenState extends State<WalletScreen> {
                                               color: primaryGreen.withOpacity(0.1),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const Icon(
+                                            child: build3DIcon(
                                               Icons.check,
-                                              color: primaryGreen,
                                               size: 20,
+                                              mainColor: primaryGreen,
+                                              shadowColor: Colors.black54,
                                             ),
                                           ),
                                           const SizedBox(width: 15),
                                           Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              build3DText(
                                                 "SMS Revenue",
-                                                style: GoogleFonts.poppins(
-                                                  color: Colors.black87,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                                fontSize: 14,
+                                                mainColor: Colors.black87,
+                                                shadowColor: Colors.black54,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              Text(
+                                              build3DText(
                                                 "Task ID: ${item['id'].toString().substring(0,4)}...",
-                                                style: GoogleFonts.poppins(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 10,
-                                                ),
+                                                fontSize: 10,
+                                                mainColor: Colors.grey[600]!,
+                                                shadowColor: Colors.black54,
                                               ),
                                             ],
                                           ),
                                         ],
                                       ),
-                                      Text(
+                                      build3DText(
                                         "+₹2.00",
-                                        style: GoogleFonts.poppins(
-                                          color: primaryGreen,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
+                                        fontSize: 16,
+                                        mainColor: primaryGreen,
+                                        shadowColor: Colors.black54,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ],
                                   ),
@@ -448,6 +441,76 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

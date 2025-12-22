@@ -178,7 +178,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
 
 // ---------------------------------------------------------
-// 2. PROFILE SCREEN (Embedded to fix Build Error)
+// PROFILE SCREEN (Embedded to fix Build Error)
 // ---------------------------------------------------------
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -230,23 +230,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: build3DText(
           "Logout",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: primaryGreen,
-          ),
+          fontSize: 20,
+          mainColor: primaryGreen,
+          shadowColor: Colors.black54,
+          fontWeight: FontWeight.bold,
         ),
-        content: Text(
+        content: build3DText(
           "Are you sure you want to logout?",
-          style: GoogleFonts.poppins(),
+          fontSize: 16,
+          mainColor: Colors.black87,
+          shadowColor: Colors.black54,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
+            child: build3DText(
               "Cancel",
-              style: GoogleFonts.poppins(color: Colors.grey),
+              fontSize: 16,
+              mainColor: Colors.grey,
+              shadowColor: Colors.black54,
             ),
           ),
           ElevatedButton(
@@ -257,9 +261,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(15),
               ),
             ),
-            child: Text(
+            child: build3DText(
               "Logout",
-              style: GoogleFonts.poppins(color: Colors.white),
+              fontSize: 16,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
             ),
           ),
         ],
@@ -315,8 +321,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Main Content
           SafeArea(
             child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(color: Colors.white),
+                        const SizedBox(height: 20),
+                        build3DText(
+                          "Loading profile...",
+                          fontSize: 16,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                        ),
+                      ],
+                    ),
                   )
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -327,17 +345,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             IconButton(
                               onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.arrow_back, color: Colors.white),
+                              icon: build3DIcon(
+                                Icons.arrow_back,
+                                size: 28,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                              ),
                             ),
                             Expanded(
-                              child: Text(
+                              child: build3DText(
                                 "My Profile",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
+                                fontSize: 24,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(width: 48), // For balance with back button
@@ -356,13 +377,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               width: 3,
                             ),
                           ),
-                          child: const CircleAvatar(
+                          child: CircleAvatar(
                             radius: 60,
                             backgroundColor: Colors.white,
-                            child: Icon(
+                            child: build3DIcon(
                               Icons.person,
                               size: 60,
-                              color: primaryGreen,
+                              mainColor: primaryGreen,
+                              shadowColor: Colors.black54,
                             ),
                           ),
                         ),
@@ -370,14 +392,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 20),
 
                         // User Info
-                        Text(
+                        build3DText(
                           phone,
-                          style: GoogleFonts.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
+                          fontSize: 24,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                         const SizedBox(height: 5),
                         Container(
@@ -386,12 +406,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
+                          child: build3DText(
                             "ID: $userId",
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
+                            fontSize: 14,
+                            mainColor: Colors.white.withOpacity(0.9),
+                            shadowColor: Colors.black54,
                           ),
                         ),
 
@@ -433,10 +452,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 "Security",
                                 Colors.blue,
                                 () {
-                                  // TODO: Implement security screen
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Security features coming soon!"),
+                                    SnackBar(
+                                      content: build3DText(
+                                        "Security features coming soon!",
+                                        fontSize: 14,
+                                        mainColor: Colors.white,
+                                        shadowColor: Colors.black54,
+                                      ),
                                       backgroundColor: primaryGreen,
                                     ),
                                   );
@@ -449,10 +472,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 "Help & Support",
                                 Colors.purple,
                                 () {
-                                  // TODO: Implement help screen
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Help & Support coming soon!"),
+                                    SnackBar(
+                                      content: build3DText(
+                                        "Help & Support coming soon!",
+                                        fontSize: 14,
+                                        mainColor: Colors.white,
+                                        shadowColor: Colors.black54,
+                                      ),
                                       backgroundColor: primaryGreen,
                                     ),
                                   );
@@ -474,18 +501,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       color: Colors.red.withOpacity(0.2),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: build3DIcon(
                                       Icons.logout,
-                                      color: Colors.red,
                                       size: 24,
+                                      mainColor: Colors.red,
+                                      shadowColor: Colors.black54,
                                     ),
                                   ),
-                                  title: Text(
+                                  title: build3DText(
                                     "Logout",
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    fontSize: 16,
+                                    mainColor: Colors.red,
+                                    shadowColor: Colors.black54,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                   trailing: Container(
                                     padding: const EdgeInsets.all(4),
@@ -493,10 +521,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       color: Colors.red.withOpacity(0.1),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: build3DIcon(
                                       Icons.chevron_right,
-                                      color: Colors.red,
                                       size: 20,
+                                      mainColor: Colors.red,
+                                      shadowColor: Colors.black54,
                                     ),
                                   ),
                                   onTap: _logout,
@@ -515,12 +544,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.white.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          child: Text(
+                          child: build3DText(
                             "Version 1.0.0",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white.withOpacity(0.8),
-                              fontSize: 12,
-                            ),
+                            fontSize: 12,
+                            mainColor: Colors.white.withOpacity(0.8),
+                            shadowColor: Colors.black54,
                           ),
                         ),
                       ],
@@ -553,18 +581,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: iconColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
+          child: build3DIcon(
             icon,
-            color: iconColor,
             size: 24,
+            mainColor: iconColor,
+            shadowColor: Colors.black54,
           ),
         ),
-        title: Text(
+        title: build3DText(
           title,
-          style: GoogleFonts.poppins(
-            color: Colors.black87,
-            fontWeight: FontWeight.w500,
-          ),
+          fontSize: 16,
+          mainColor: Colors.black87,
+          shadowColor: Colors.black54,
+          fontWeight: FontWeight.w500,
         ),
         trailing: Container(
           padding: const EdgeInsets.all(4),
@@ -572,14 +601,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: primaryGreen.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
+          child: build3DIcon(
             Icons.chevron_right,
-            color: primaryGreen,
             size: 20,
+            mainColor: primaryGreen,
+            shadowColor: Colors.black54,
           ),
         ),
         onTap: onTap,
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

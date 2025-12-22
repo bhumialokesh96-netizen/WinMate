@@ -31,8 +31,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _phoneController.text.isEmpty ||
         _referralController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("All fields including Referral Code are required!"), 
+        SnackBar(
+          content: build3DText(
+            "All fields including Referral Code are required!",
+            fontSize: 14,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+          ), 
           backgroundColor: Colors.orange,
         ),
       );
@@ -60,7 +65,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         setState(() => isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: ${e.toString().split('\n')[0]}"), 
+            content: build3DText(
+              "Error: ${e.toString().split('\n')[0]}",
+              fontSize: 14,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
+            ), 
             backgroundColor: Colors.red,
           ),
         );
@@ -76,20 +86,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
+        title: build3DText(
           "Verify Email",
-          style: GoogleFonts.poppins(
-            color: primaryGreen,
-            fontWeight: FontWeight.bold,
-          ),
+          fontSize: 20,
+          mainColor: primaryGreen,
+          shadowColor: Colors.black54,
+          fontWeight: FontWeight.bold,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            build3DText(
               "Enter the 6-digit code sent to\n$email",
-              style: GoogleFonts.poppins(color: Colors.grey[700]),
-              textAlign: TextAlign.center,
+              fontSize: 16,
+              mainColor: Colors.grey[700]!,
+              shadowColor: Colors.black54,
             ),
             const SizedBox(height: 20),
             TextField(
@@ -117,7 +128,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             style: TextButton.styleFrom(
               foregroundColor: Colors.grey,
             ),
-            child: const Text("Cancel"),
+            child: build3DText(
+              "Cancel",
+              fontSize: 16,
+              mainColor: Colors.grey,
+              shadowColor: Colors.black54,
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -138,16 +154,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Invalid verification code"),
+                  SnackBar(
+                    content: build3DText(
+                      "Invalid verification code",
+                      fontSize: 14,
+                      mainColor: Colors.white,
+                      shadowColor: Colors.black54,
+                    ),
                     backgroundColor: Colors.red,
                   ),
                 );
               }
             },
-            child: Text(
+            child: build3DText(
               "Verify",
-              style: GoogleFonts.poppins(color: Colors.white),
+              fontSize: 16,
+              mainColor: Colors.white,
+              shadowColor: Colors.black54,
             ),
           ),
         ],
@@ -213,39 +236,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: build3DIcon(
                         Icons.rocket_launch,
                         size: 60,
-                        color: primaryGreen,
+                        mainColor: primaryGreen,
+                        shadowColor: Colors.black54,
                       ),
                     ),
                     
                     const SizedBox(height: 30),
                     
-                    Text(
+                    build3DText(
                       "Create Account",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                      fontSize: 28,
+                      mainColor: Colors.white,
+                      shadowColor: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                      depth: 3,
                     ),
                     
                     const SizedBox(height: 5),
                     
-                    Text(
+                    build3DText(
                       "Start your journey with us!",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
-                      ),
+                      fontSize: 16,
+                      mainColor: Colors.white.withOpacity(0.9),
+                      shadowColor: Colors.black54,
                     ),
                     
                     const SizedBox(height: 40),
@@ -309,13 +325,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 height: 20,
                                 child: CircularProgressIndicator(color: Colors.white),
                               )
-                            : Text(
+                            : build3DText(
                                 "REGISTER",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
+                                fontSize: 16,
+                                mainColor: Colors.white,
+                                shadowColor: Colors.black54,
+                                fontWeight: FontWeight.bold,
                               ),
                       ),
                     ),
@@ -326,9 +341,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        build3DText(
                           "Already have an account? ",
-                          style: GoogleFonts.poppins(color: Colors.white),
+                          fontSize: 14,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
                         GestureDetector(
                           onTap: () {
@@ -337,13 +354,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               MaterialPageRoute(builder: (context) => const LoginScreen()),
                             );
                           },
-                          child: Text(
+                          child: build3DText(
                             "Login",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                            ),
+                            fontSize: 14,
+                            mainColor: Colors.white,
+                            shadowColor: Colors.black54,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -371,7 +387,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       keyboardType: type,
       style: const TextStyle(color: Colors.black87),
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.grey),
+        prefixIcon: build3DIcon(
+          icon,
+          size: 20,
+          mainColor: Colors.grey,
+          shadowColor: Colors.black54,
+        ),
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey[500]),
         filled: true,
@@ -382,9 +403,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(
+                icon: build3DIcon(
                   _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey,
+                  size: 20,
+                  mainColor: Colors.grey,
+                  shadowColor: Colors.black54,
                 ),
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
@@ -393,6 +416,76 @@ class _RegisterScreenState extends State<RegisterScreen> {
             : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
+    );
+  }
+
+  // 3D Text Widget
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 3D Icon Widget
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }

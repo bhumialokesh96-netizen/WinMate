@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math'; // <-- ADD THIS IMPORT for cos and sin functions
+import 'dart:math'; // For math functions (cos, sin, pi)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -120,9 +120,11 @@ class _MiningDashboardState extends State<MiningDashboard> {
             children: [
               const CircularProgressIndicator(color: Colors.white),
               const SizedBox(height: 20),
-              Text(
-                'Loading mining data...', 
-                style: GoogleFonts.poppins(color: Colors.white)
+              build3DText(
+                'Loading mining data...',
+                fontSize: 16,
+                mainColor: Colors.white,
+                shadowColor: Colors.black54,
               ),
             ],
           ),
@@ -135,7 +137,13 @@ class _MiningDashboardState extends State<MiningDashboard> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text("SMS Node", style: GoogleFonts.poppins(color: Colors.white)),
+        title: build3DText(
+          "SMS Node",
+          fontSize: 24,
+          mainColor: Colors.white,
+          shadowColor: Colors.black54,
+          fontWeight: FontWeight.bold,
+        ),
         centerTitle: true,
       ),
       body: Stack(
@@ -190,20 +198,19 @@ class _MiningDashboardState extends State<MiningDashboard> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      build3DIcon(
                         isMining ? Icons.circle : Icons.circle_outlined,
-                        color: isMining ? Colors.green : Colors.red,
                         size: 12,
+                        mainColor: isMining ? Colors.green : Colors.red,
+                        shadowColor: Colors.black54,
                       ),
                       const SizedBox(width: 8),
-                      Text(
+                      build3DText(
                         isMining ? "● ACTIVE (SIM ${_selectedSimSlot + 1})" : "● OFFLINE",
-                        style: GoogleFonts.poppins(
-                          color: isMining ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          letterSpacing: 1.0,
-                        ),
+                        fontSize: 16,
+                        mainColor: isMining ? Colors.green : Colors.red,
+                        shadowColor: Colors.black54,
+                        fontWeight: FontWeight.bold,
                       ),
                     ],
                   ),
@@ -242,10 +249,11 @@ class _MiningDashboardState extends State<MiningDashboard> {
                         painter: RadarPainter(isMining: isMining),
                       ),
                       Center(
-                        child: Icon(
+                        child: build3DIcon(
                           isMining ? Icons.wifi_tethering : Icons.wifi_tethering_off,
                           size: 80,
-                          color: isMining ? const Color(0xFF00C853) : Colors.grey,
+                          mainColor: isMining ? const Color(0xFF00C853) : Colors.grey,
+                          shadowColor: Colors.black54,
                         ),
                       ),
                     ],
@@ -270,40 +278,30 @@ class _MiningDashboardState extends State<MiningDashboard> {
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        "Wallet Balance", 
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF666666),
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        )
+                      build3DText(
+                        "Wallet Balance",
+                        fontSize: 16,
+                        mainColor: const Color(0xFF666666),
+                        shadowColor: Colors.black54,
+                        fontWeight: FontWeight.w500,
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        "₹${balance.toStringAsFixed(2)}", 
-                        style: GoogleFonts.poppins(
-                          fontSize: 48, 
-                          fontWeight: FontWeight.bold, 
-                          color: const Color(0xFF00C853),
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        )
+                      build3DText(
+                        "₹${balance.toStringAsFixed(2)}",
+                        fontSize: 48,
+                        mainColor: const Color(0xFF00C853),
+                        shadowColor: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        depth: 3,
                       ),
                       if (_errorMessage.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
-                          child: Text(
+                          child: build3DText(
                             _errorMessage,
-                            style: GoogleFonts.poppins(
-                              color: Colors.red,
-                              fontSize: 12,
-                            ),
-                            textAlign: TextAlign.center,
+                            fontSize: 12,
+                            mainColor: Colors.red,
+                            shadowColor: Colors.black54,
                           ),
                         ),
                     ],
@@ -312,7 +310,7 @@ class _MiningDashboardState extends State<MiningDashboard> {
                 
                 const SizedBox(height: 30),
 
-                // --- SIM SELECTOR WIDGET ---
+                // --- SIM SELECTOR WIDGET (Converted to 3D) ---
                 SimSelector(
                   selectedSlot: _selectedSimSlot,
                   isMining: isMining, 
@@ -331,19 +329,17 @@ class _MiningDashboardState extends State<MiningDashboard> {
                     borderRadius: BorderRadius.circular(15),
                     border: Border.all(color: Colors.white.withOpacity(0.2)),
                   ),
-                  child: Text(
-                    statusLog, 
-                    textAlign: TextAlign.center, 
-                    style: GoogleFonts.poppins(
-                      color: Colors.white, 
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    )
+                  child: build3DText(
+                    statusLog,
+                    fontSize: 14,
+                    mainColor: Colors.white,
+                    shadowColor: Colors.black54,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // ACTION BUTTON
+                // ACTION BUTTON (Converted to 3D)
                 SizedBox(
                   width: double.infinity,
                   height: 60,
@@ -358,20 +354,19 @@ class _MiningDashboardState extends State<MiningDashboard> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        build3DIcon(
                           isMining ? Icons.stop_circle : Icons.play_circle_fill,
-                          color: Colors.white,
                           size: 24,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
                         ),
                         const SizedBox(width: 10),
-                        Text(
+                        build3DText(
                           isMining ? "STOP NODE" : "START NODE",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18, 
-                            fontWeight: FontWeight.bold, 
-                            color: Colors.white,
-                            letterSpacing: 1.0,
-                          ),
+                          fontSize: 18,
+                          mainColor: Colors.white,
+                          shadowColor: Colors.black54,
+                          fontWeight: FontWeight.bold,
                         ),
                       ],
                     ),
@@ -382,6 +377,76 @@ class _MiningDashboardState extends State<MiningDashboard> {
           ),
         ],
       ),
+    );
+  }
+
+  // --- 3D Text Widget ---
+  Widget build3DText(
+    String text, {
+    double fontSize = 18,
+    Color mainColor = Colors.white,
+    Color shadowColor = const Color(0xFF004D40),
+    double depth = 2,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        // Shadow text
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+
+        // Front text
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+              shadows: const [
+                Shadow(color: Colors.black26, blurRadius: 2),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- 3D Icon Widget ---
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    double depth = 1,
+  }) {
+    return Stack(
+      children: [
+        // Shadow icon
+        Icon(
+          icon,
+          size: size,
+          color: shadowColor,
+        ),
+        
+        // Front icon
+        Transform.translate(
+          offset: Offset(0, -depth),
+          child: Icon(
+            icon,
+            size: size,
+            color: mainColor,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -406,7 +471,7 @@ class RadarPainter extends CustomPainter {
       canvas.drawCircle(center, radius * i / 4, paint);
     }
     
-    // Draw radar lines - FIXED: Use math.cos and math.sin
+    // Draw radar lines
     for (int i = 0; i < 8; i++) {
       final angle = (i * 45) * (pi / 180); // Use pi from dart:math
       final dx = radius * cos(angle); // Use cos from dart:math
@@ -419,9 +484,7 @@ class RadarPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// ---------------------------------------------------------
-// SIM SELECTOR WIDGET (Updated for green theme)
-// ---------------------------------------------------------
+// SIM SELECTOR WIDGET (Updated for 3D)
 class SimSelector extends StatelessWidget {
   final int selectedSlot;
   final Function(int) onSimChanged;
@@ -441,20 +504,12 @@ class SimSelector extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 5),
-          child: Text(
+          child: build3DText(
             "Select SIM Card",
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                )
-              ]
-            ),
+            fontSize: 16,
+            mainColor: Colors.white,
+            shadowColor: Colors.black54,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 15),
@@ -499,19 +554,19 @@ class SimSelector extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(
+              build3DIcon(
                 Icons.sim_card,
-                color: isSelected ? const Color(0xFF00C853) : Colors.white,
                 size: 40,
+                mainColor: isSelected ? const Color(0xFF00C853) : Colors.white,
+                shadowColor: Colors.black54,
               ),
               const SizedBox(height: 10),
-              Text(
+              build3DText(
                 title,
-                style: GoogleFonts.poppins(
-                  color: isSelected ? Colors.black : Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                fontSize: 16,
+                mainColor: isSelected ? Colors.black : Colors.white,
+                shadowColor: Colors.black54,
+                fontWeight: FontWeight.bold,
               ),
               const SizedBox(height: 5),
               if (isSelected)
@@ -524,15 +579,19 @@ class SimSelector extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.check_circle, color: Colors.white, size: 14),
+                      build3DIcon(
+                        Icons.check_circle,
+                        size: 14,
+                        mainColor: Colors.white,
+                        shadowColor: Colors.black54,
+                      ),
                       const SizedBox(width: 4),
-                      Text(
+                      build3DText(
                         "Selected",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        fontSize: 11,
+                        mainColor: Colors.white,
+                        shadowColor: Colors.black54,
+                        fontWeight: FontWeight.bold,
                       ),
                     ],
                   ),
@@ -541,6 +600,56 @@ class SimSelector extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  // Local 3D Text/Icon Helpers
+  Widget build3DText(
+    String text, {
+    double fontSize = 14,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+    FontWeight fontWeight = FontWeight.bold,
+  }) {
+    return Stack(
+      children: [
+        Text(
+          text,
+          style: GoogleFonts.poppins(
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            color: shadowColor,
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -1.5),
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: mainColor,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget build3DIcon(
+    IconData icon, {
+    double size = 24,
+    Color mainColor = Colors.white,
+    Color shadowColor = Colors.black54,
+  }) {
+    return Stack(
+      children: [
+        Icon(icon, size: size, color: shadowColor),
+        Transform.translate(
+          offset: const Offset(0, -1.5),
+          child: Icon(icon, size: size, color: mainColor),
+        ),
+      ],
     );
   }
 }
