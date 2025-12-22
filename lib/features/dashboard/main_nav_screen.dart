@@ -7,6 +7,7 @@ import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
 import 'package:winmate/features/system/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'faq_page.dart'; // Add this at the top
 
 
@@ -348,7 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               
               // WhatsApp Option
               _buildSupportOption(
-                icon: Icons.whatsapp_rounded,
+                icon: FontAwesomeIcons.whatsapp,
                 title: "WhatsApp Group",
                 subtitle: "Join our community",
                 color: const Color(0xFF25D366),
@@ -362,7 +363,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               
               // Telegram Option
               _buildSupportOption(
-                icon: Icons.telegram,
+                icon: FontAwesomeIcons.telegram,
                 title: "Telegram Group",
                 subtitle: "Get instant updates",
                 color: const Color(0xFF0088CC),
