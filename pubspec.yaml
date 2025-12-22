@@ -43,6 +43,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assests/images/iphone_background.jpg
+
 
   # assets:
     # - assests/animations/  # <--- Matches your misspelled folder
