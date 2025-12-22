@@ -5,9 +5,12 @@ import 'package:winmate/features/auth/login_screen.dart';
 import 'package:winmate/features/home/home_dashboard.dart';
 import 'package:winmate/features/mining/mining_dashboard.dart';
 import 'package:winmate/features/invite/invite_screen.dart';
-// CORRECT PATH
 import 'package:winmate/features/system/notification_service.dart'; 
-// NOTE: No import for profile_screen here because we define it below!
+
+// Color constants for the green theme
+const primaryGreen = Color(0xFF00C853);
+const lightGreen = Color(0xFFE8F5E9);
+const accentOrange = Color(0xFFFF9100);
 
 // ---------------------------------------------------------
 // 1. MAIN NAVIGATION
@@ -33,26 +36,146 @@ class _MainNavScreenState extends State<MainNavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF16213E),
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFFE94560),
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.bolt), label: "Mining"),
-          BottomNavigationBarItem(icon: Icon(Icons.rocket_launch), label: "Invite"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+      backgroundColor: primaryGreen,
+      body: Stack(
+        children: [
+          // Gradient Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF00E676),
+                  Color(0xFF00C853),
+                  Color(0xFF00BFA5),
+                ],
+              ),
+            ),
+          ),
+          
+          // Pattern Overlay
+          Opacity(
+            opacity: 0.05,
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage("https://www.transparenttextures.com/patterns/cubes.png"),
+                  repeat: ImageRepeat.repeat,
+                ),
+              ),
+            ),
+          ),
+
+          // Content
+          _screens[_selectedIndex],
         ],
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.white.withOpacity(0.95),
+            currentIndex: _selectedIndex,
+            onTap: (index) => setState(() => _selectedIndex = index),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: primaryGreen,
+            unselectedItemColor: Colors.grey[600],
+            showUnselectedLabels: true,
+            selectedLabelStyle: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            items: [
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 0 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.home,
+                    color: _selectedIndex == 0 ? primaryGreen : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: "Home",
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 1 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.bolt,
+                    color: _selectedIndex == 1 ? primaryGreen : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: "Mining",
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 2 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.rocket_launch,
+                    color: _selectedIndex == 2 ? primaryGreen : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: "Invite",
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 3 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    color: _selectedIndex == 3 ? primaryGreen : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: "Profile",
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
+
 
 // ---------------------------------------------------------
 // 2. PROFILE SCREEN (Embedded to fix Build Error)

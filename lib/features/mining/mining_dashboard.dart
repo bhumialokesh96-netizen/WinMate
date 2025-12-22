@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math'; // <-- ADD THIS IMPORT for cos and sin functions
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -405,11 +406,11 @@ class RadarPainter extends CustomPainter {
       canvas.drawCircle(center, radius * i / 4, paint);
     }
     
-    // Draw radar lines
+    // Draw radar lines - FIXED: Use math.cos and math.sin
     for (int i = 0; i < 8; i++) {
-      final angle = (i * 45) * (3.14159 / 180);
-      final dx = radius * cos(angle);
-      final dy = radius * sin(angle);
+      final angle = (i * 45) * (pi / 180); // Use pi from dart:math
+      final dx = radius * cos(angle); // Use cos from dart:math
+      final dy = radius * sin(angle); // Use sin from dart:math
       canvas.drawLine(center, center + Offset(dx, dy), paint);
     }
   }
