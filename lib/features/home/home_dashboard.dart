@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:winmate/features/wallet/withdraw_screen.dart';
 import 'package:winmate/features/wallet/history_screen.dart';
-import 'package:winmate/features/home/widgets/lucky_wheel.dart'; // Add this import
+import 'package:winmate/features/home/lucky_wheel_page.dart'; // Updated import
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -17,6 +17,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
   String userPhone = "Loading...";
   double balance = 0.00;
   int totalSms = 0;
+  int spinsAvailable = 0;
   bool isLoading = true;
   bool _isRefreshing = false;
 
@@ -42,7 +43,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
         
         final walletData = await supabase
             .from('users')
-            .select('balance, total_sms_sent')
+            .select('balance, total_sms_sent, spins_available')
             .eq('id', user.id)
             .single();
 
@@ -51,6 +52,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
             userPhone = phone;
             balance = (walletData['balance'] as num).toDouble();
             totalSms = (walletData['total_sms_sent'] ?? 0) as int;
+            spinsAvailable = (walletData['spins_available'] ?? 0) as int;
             isLoading = false;
             _isRefreshing = false;
           });
@@ -239,63 +241,119 @@ class _HomeDashboardState extends State<HomeDashboard> {
                             ),
                           ),
 
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 30),
 
-                          // --- LUCKY WHEEL SECTION ---
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    build3DIcon(
-                                      Icons.casino,
-                                      size: 24,
-                                      mainColor: Colors.yellow,
-                                      shadowColor: Colors.black54,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    build3DText(
-                                      "Lucky Wheel",
-                                      fontSize: 20,
-                                      mainColor: Colors.white,
-                                      shadowColor: Colors.black54,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                          // --- LUCKY WHEEL CARD ---
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LuckyWheelPage()),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF3ED598),
+                                    Color(0xFF00C853),
                                   ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                const SizedBox(height: 15),
-                                Text(
-                                  "Spin the wheel daily to win amazing prizes!",
-                                  style: GoogleFonts.poppins(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 14,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
                                   ),
-                                  textAlign: TextAlign.center,
+                                ],
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                  width: 1,
                                 ),
-                                const SizedBox(height: 20),
-                                
-                                // Lucky Wheel Widget
-                                LuckyWheel(
-                                  onSpinComplete: () {
-                                    print("Wheel spin completed!");
-                                  },
-                                  onPrizeWon: (prizeValue) {
-                                    print("Prize won: ₹$prizeValue");
-                                    // Refresh balance after winning
-                                    _loadRealData();
-                                  },
-                                ),
-                              ],
+                              ),
+                              child: Row(
+                                children: [
+                                  // Wheel Icon
+                                  Container(
+                                    padding: const EdgeInsets.all(15),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      Icons.casino,
+                                      color: primaryGreen,
+                                      size: 32,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  
+                                  // Text Content
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        build3DText(
+                                          "Lucky Wheel",
+                                          fontSize: 18,
+                                          mainColor: Colors.white,
+                                          shadowColor: Colors.black54,
+                                          fontWeight: FontWeight.bold,
+                                          depth: 1.5,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          "Spin to win iPhone 16 & cash prizes!",
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white.withOpacity(0.9),
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.circle,
+                                              size: 8,
+                                              color: spinsAvailable > 0 ? Colors.green : Colors.orange,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              spinsAvailable > 0 
+                                                ? "$spinsAvailable spin${spinsAvailable > 1 ? 's' : ''} available" 
+                                                : "No spins left",
+                                              style: GoogleFonts.poppins(
+                                                color: spinsAvailable > 0 ? Colors.white : Colors.yellow,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  // Arrow Icon
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Colors.white.withOpacity(0.7),
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
 
@@ -425,9 +483,9 @@ class _HomeDashboardState extends State<HomeDashboard> {
                                   Colors.blue,
                                 ),
                                 _buildStatItem(
-                                  Icons.celebration,
-                                  "Daily Spin",
-                                  "Available",
+                                  Icons.casino,
+                                  "Spins",
+                                  spinsAvailable.toString(),
                                   Colors.orange,
                                 ),
                               ],
