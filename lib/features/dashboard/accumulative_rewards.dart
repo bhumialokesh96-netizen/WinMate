@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:winmate/features/home/lucky_wheel_page.dart';
+import 'package:winmate/features/invite/invite_screen.dart';
 
 class AccumulativeRewards extends StatefulWidget {
   const AccumulativeRewards({super.key});
@@ -486,43 +488,51 @@ class _AccumulativeRewardsState extends State<AccumulativeRewards> {
                 const SizedBox(height: 30),
 
                 // SPIN BUTTON
-                if (spinsAvailable > 0)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 60,
-                    child: ElevatedButton(
-                      onPressed: _useSpin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 8,
-                        shadowColor: Colors.orange.withOpacity(0.5),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          build3DIcon(
-                            Icons.celebration,
-                            size: 24,
-                            mainColor: Colors.white,
-                            shadowColor: Colors.black54,
-                          ),
-                          const SizedBox(width: 10),
-                          build3DText(
-                            "SPIN WHEEL ($spinsAvailable left)",
-                            fontSize: 18,
-                            mainColor: Colors.white,
-                            shadowColor: Colors.black54,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                // SPIN BUTTON  
+if (spinsAvailable > 0)  
+  SizedBox(  
+    width: double.infinity,  
+    height: 60,  
+    child: ElevatedButton(  
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LuckyWheelPage(),
+          ),
+        );
+      },  
+      style: ElevatedButton.styleFrom(  
+        backgroundColor: Colors.orange,  
+        shape: RoundedRectangleBorder(  
+          borderRadius: BorderRadius.circular(15),  
+        ),  
+        elevation: 8,  
+        shadowColor: Colors.orange.withOpacity(0.5),  
+      ),  
+      child: Row(  
+        mainAxisAlignment: MainAxisAlignment.center,  
+        children: [  
+          build3DIcon(  
+            Icons.celebration,  
+            size: 24,  
+            mainColor: Colors.white,  
+            shadowColor: Colors.black54,  
+          ),  
+          const SizedBox(width: 10),  
+          build3DText(  
+            "SPIN WHEEL ($spinsAvailable left)",  
+            fontSize: 18,  
+            mainColor: Colors.white,  
+            shadowColor: Colors.black54,  
+            fontWeight: FontWeight.bold,  
+          ),  
+        ],  
+      ),  
+    ),  
+  ),  
 
-                const SizedBox(height: 20),
+const SizedBox(height: 20),
 
                 // INVITE BUTTON
                 SizedBox(
@@ -563,23 +573,31 @@ class _AccumulativeRewardsState extends State<AccumulativeRewards> {
                 const SizedBox(height: 15),
 
                 // QUICK SHARE BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: OutlinedButton(
-                    onPressed: _shareInviteLink,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    child: const Text("Copy Invite Link"),
-                  ),
-                ),
+               // QUICK SHARE BUTTON
+SizedBox(
+  width: double.infinity,
+  height: 50,
+  child: OutlinedButton(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const InviteScreen(),
+        ),
+      );
+    },
+    style: OutlinedButton.styleFrom(
+      foregroundColor: Colors.white,
+      side: const BorderSide(color: Colors.white),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+    ),
+    child: const Text("Copy Invite Link"),
+  ),
+),
 
-                const SizedBox(height: 20),
+const SizedBox(height: 20),
               ],
             ),
           ),

@@ -33,12 +33,12 @@ class _MainNavScreenState extends State<MainNavScreen> {
 
   // The screens list uses the class defined at the bottom
   final List<Widget> _screens = [
-    const HomeDashboard(),   
-    const MiningDashboard(), 
-    const InviteScreen(),    
-    const ProfileScreen(),
-    const AccumulativeRewards(),// This now refers to the class below
-  ];
+  const HomeDashboard(),        // 0
+  const MiningDashboard(),      // 1
+  const InviteScreen(),         // 2
+  const AccumulativeRewards(),  // 3 ✅
+  const ProfileScreen(),        // 4 ✅
+];
 
   @override
   Widget build(BuildContext context) {
@@ -163,12 +163,11 @@ class _MainNavScreenState extends State<MainNavScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: _selectedIndex == 4 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    color: _selectedIndex == 3 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.rocket_launch,
-                    color: _selectedIndex == 4 ? primaryGreen : Colors.grey[600],
+                    Icons.card_giftcard _selectedIndex == 3 ? primaryGreen : Colors.grey[600],
                     size: 24,
                   ),
                 ),
