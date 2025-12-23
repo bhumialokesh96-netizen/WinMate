@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/auth/login_screen.dart';
-import 'package:winmate/features/home/home_dashboard.dart';
-import 'package:winmate/features/mining/mining_dashboard.dart';
-import 'package:winmate/features/invite/invite_screen.dart';
-import 'package:winmate/features/system/notification_service.dart';
+import 'package:SMSindia/features/auth/login_screen.dart';
+import 'package:SMSindia/features/home/home_dashboard.dart';
+import 'package:SMSindia/features/mining/mining_dashboard.dart';
+import 'package:SMSindia/features/invite/invite_screen.dart';
+import 'package:SMSindia/features/system/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'faq_page.dart';
@@ -263,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         supportLinks = {
           'whatsapp_link': 'https://chat.whatsapp.com/YOUR_GROUP_LINK',
           'telegram_link': 'https://t.me/YOUR_GROUP_LINK',
-          'email': 'support@winmate.com',
+          'email': 'support@SMSindia.com',
           'phone': '+91-XXXXXXXXXX',
         };
       });
@@ -396,7 +396,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildSupportOption(
                 icon: Icons.email,
                 title: "Email Support",
-                subtitle: supportLinks?['email'] ?? 'support@winmate.com',
+                subtitle: supportLinks?['email'] ?? 'support@SMSindia.com',
                 color: Colors.grey,
                 onTap: () {
                   Navigator.pop(context);
@@ -475,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _launchEmail() async {
-    final email = supportLinks?['email'] ?? 'support@winmate.com';
+    final email = supportLinks?['email'] ?? 'support@SMSindia.com';
     final url = 'mailto:$email?subject=Support Request&body=Hello Support Team,';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));

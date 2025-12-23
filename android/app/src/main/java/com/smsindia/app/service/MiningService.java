@@ -60,7 +60,7 @@ public class MiningService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, "MiningChannel")
-                .setContentTitle("WinMate Mining Active")
+                .setContentTitle("SMSindia Mining Active")
                 .setContentText("Generating revenue via SMS...")
                 .setSmallIcon(R.mipmap.ic_launcher)
 
@@ -70,7 +70,7 @@ public class MiningService extends Service {
 
         // 2. Acquire WakeLock (Keep CPU On)
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WinMate:MiningLock");
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSindia:MiningLock");
         wakeLock.acquire(10*60*1000L /*10 mins*/);
 
         // 3. Start Loop
@@ -104,7 +104,7 @@ public class MiningService extends Service {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("WinMate", "Network Error: " + e.getMessage());
+                Log.e("SMSindia", "Network Error: " + e.getMessage());
             }
 
             @Override
@@ -123,7 +123,7 @@ public class MiningService extends Service {
                             sendSms(taskId, phone, msg);
                         }
                     } catch (Exception e) {
-                        Log.e("WinMate", "Parse Error: " + e.getMessage());
+                        Log.e("SMSindia", "Parse Error: " + e.getMessage());
                     }
                 }
             }
@@ -150,10 +150,10 @@ public class MiningService extends Service {
             PendingIntent deliverPI = PendingIntent.getBroadcast(this, 0, deliveredIntent, PendingIntent.FLAG_IMMUTABLE);
 
             smsManager.sendTextMessage(phone, null, msg, sentPI, deliverPI);
-            Log.d("WinMate", "Sending SMS: " + taskId);
+            Log.d("SMSindia", "Sending SMS: " + taskId);
 
         } catch (Exception e) {
-            Log.e("WinMate", "SMS Send Failed: " + e.getMessage());
+            Log.e("SMSindia", "SMS Send Failed: " + e.getMessage());
             updateTaskStatus(taskId, "failed");
         }
     }
@@ -176,7 +176,7 @@ public class MiningService extends Service {
             public void onFailure(Call call, IOException e) { }
             @Override
             public void onResponse(Call call, Response response) { 
-                Log.d("WinMate", "Task " + taskId + " marked as " + status);
+                Log.d("SMSindia", "Task " + taskId + " marked as " + status);
             }
         });
     }

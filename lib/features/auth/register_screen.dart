@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/auth/login_screen.dart';
-import 'package:winmate/features/dashboard/main_nav_screen.dart';
+import 'package:SMSindia/features/auth/login_screen.dart';
+import 'package:SMSindia/features/dashboard/main_nav_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

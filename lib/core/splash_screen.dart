@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/auth/login_screen.dart'; // Updated path
-import 'package:winmate/features/dashboard/main_nav_screen.dart'; // Updated path
+import 'package:SMSindia/features/auth/login_screen.dart'; // Updated path
+import 'package:SMSindia/features/dashboard/main_nav_screen.dart'; // Updated path
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
             
             // App Name
             Text(
-              "WinMate",
+              "SMSindia",
               style: GoogleFonts.poppins(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,

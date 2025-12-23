@@ -29,9 +29,9 @@ class SupabaseService {
       if (!isValid) return "Invalid Invite Code. Ask your friend for a correct one.";
 
       // B. Create Auth User (Email/Phone + Password)
-      // Note: We use phone@winmate.com as a fake email because Supabase needs email by default
+      // Note: We use phone@SMSindia.com as a fake email because Supabase needs email by default
       final AuthResponse res = await _client.auth.signUp(
-        email: "$phone@winmate.com", 
+        email: "$phone@SMSindia.com", 
         password: password,
       );
 
@@ -61,7 +61,7 @@ class SupabaseService {
   Future<String?> loginUser(String phone, String password) async {
     try {
       await _client.auth.signInWithPassword(
-        email: "$phone@winmate.com",
+        email: "$phone@SMSindia.com",
         password: password,
       );
       return null; // Success

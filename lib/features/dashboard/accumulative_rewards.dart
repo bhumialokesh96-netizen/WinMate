@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/home/lucky_wheel_page.dart';
-import 'package:winmate/features/invite/invite_screen.dart';
+import 'package:SMSindia/features/home/lucky_wheel_page.dart';
+import 'package:SMSindia/features/invite/invite_screen.dart';
 
 class AccumulativeRewards extends StatefulWidget {
   const AccumulativeRewards({super.key});

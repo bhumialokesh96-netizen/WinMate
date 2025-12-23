@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:winmate/features/wallet/withdraw_screen.dart';
-import 'package:winmate/features/wallet/history_screen.dart';
-import 'package:winmate/features/home/lucky_wheel_page.dart'; // Updated import
+import 'package:SMSindia/features/wallet/withdraw_screen.dart';
+import 'package:SMSindia/features/wallet/history_screen.dart';
+import 'package:SMSindia/features/home/lucky_wheel_page.dart'; // Updated import
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});

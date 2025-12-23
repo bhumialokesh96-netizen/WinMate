@@ -8,6 +8,6 @@ import android.util.Log;
 public class SmsDeliveredReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("WinMate", "SMS Delivered confirmed by Network");
+        Log.d("SMSIndia", "SMS Delivered confirmed by Network");
     }
 }

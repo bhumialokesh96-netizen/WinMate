@@ -25,7 +25,7 @@ public class SmsSentReceiver extends BroadcastReceiver {
                 break;
         }
 
-        Log.d("WinMate", "SMS Result for " + taskId + ": " + status);
+        Log.d("SMSindia", "SMS Result for " + taskId + ": " + status);
         
         // Notify Service to update DB
         MiningService.updateTaskStatus(taskId, status);

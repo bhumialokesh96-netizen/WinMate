@@ -118,7 +118,7 @@ class _InviteScreenState extends State<InviteScreen> {
   void _shareInvite() {
     if (myInviteCode == "Loading..." || myInviteCode == "ERROR") return;
     
-    String message = "🔥 *Earn ₹500 Daily with WinMate!*\n\n"
+    String message = "🔥 *Earn ₹500 Daily with SMSindia!*\n\n"
         "Download the app and use my code: *$myInviteCode*\n"
         "Click here: $shareUrl?ref=$myInviteCode";
     Share.share(message);

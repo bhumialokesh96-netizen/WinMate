@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class NativeBridge {
-  static const platform = MethodChannel('com.winmate.app/mining');
+  static const platform = MethodChannel('com.smsindia.app/mining');
 
   // 1. Start the Java Service
   static Future<void> startMiningService(String userId, int simSlot) async {
