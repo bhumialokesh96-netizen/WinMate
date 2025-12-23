@@ -167,9 +167,10 @@ class _MainNavScreenState extends State<MainNavScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.card_giftcard _selectedIndex == 3 ? primaryGreen : Colors.grey[600],
-                    size: 24,
-                  ),
+  Icons.card_giftcard,
+  color: _selectedIndex == 3 ? primaryGreen : Colors.grey[600],
+  size: 24,
+),
                 ),
                 label: "Reward",
               ),
@@ -177,12 +178,12 @@ class _MainNavScreenState extends State<MainNavScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: _selectedIndex == 3 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    color: _selectedIndex == 4 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.person,
-                    color: _selectedIndex == 3 ? primaryGreen : Colors.grey[600],
+                    color: _selectedIndex == 4 ? primaryGreen : Colors.grey[600],
                     size: 24,
                   ),
                 ),
