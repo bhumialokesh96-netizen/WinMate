@@ -8,7 +8,8 @@ import 'package:winmate/features/invite/invite_screen.dart';
 import 'package:winmate/features/system/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'faq_page.dart'; // Add this at the top
+import 'faq_page.dart';
+import 'accumulative_rewards.dart';// Add this at the top
 
 
 
@@ -35,7 +36,8 @@ class _MainNavScreenState extends State<MainNavScreen> {
     const HomeDashboard(),   
     const MiningDashboard(), 
     const InviteScreen(),    
-    const ProfileScreen(), // This now refers to the class below
+    const ProfileScreen(),
+    const accumulative_rewards(),// This now refers to the class below
   ];
 
   @override
@@ -156,6 +158,21 @@ class _MainNavScreenState extends State<MainNavScreen> {
                   ),
                 ),
                 label: "Invite",
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 2 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.rocket_launch,
+                    color: _selectedIndex == 2 ? primaryGreen : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: "Reward",
               ),
               BottomNavigationBarItem(
                 icon: Container(
