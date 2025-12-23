@@ -37,7 +37,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
     const MiningDashboard(), 
     const InviteScreen(),    
     const ProfileScreen(),
-    const accumulative_rewards(),// This now refers to the class below
+    const AccumulativeRewards(),// This now refers to the class below
   ];
 
   @override
@@ -163,12 +163,12 @@ class _MainNavScreenState extends State<MainNavScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: _selectedIndex == 2 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
+                    color: _selectedIndex == 4 ? primaryGreen.withOpacity(0.1) : Colors.transparent,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.rocket_launch,
-                    color: _selectedIndex == 2 ? primaryGreen : Colors.grey[600],
+                    color: _selectedIndex == 4 ? primaryGreen : Colors.grey[600],
                     size: 24,
                   ),
                 ),
