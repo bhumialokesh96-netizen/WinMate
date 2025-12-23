@@ -588,20 +588,27 @@ class _MiningDashboardState extends State<MiningDashboard> {
   }
 
   Widget _buildSimCard({
-    required int simSlot,
-    required String simName,
-    required bool isMining,
-    required int sentToday,
-    required int dailyLimit,
-  }) {
-    final isLimitReached = sentToday >= dailyLimit;
-    final progress = dailyLimit > 0 ? sentToday / dailyLimit : 0;
+  required int simSlot,
+  required String simName,
+  required bool isMining,
+  required int sentToday,
+  required int dailyLimit,
+}) {
+  final isLimitReached = sentToday >= dailyLimit;
+  final progress = dailyLimit > 0 ? sentToday / dailyLimit.toDouble() : 0.0; // FIXED
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
+  return Container(
+    // ... rest of the method remains the same
+    
+    // FIXED LinearProgressIndicator:
+    LinearProgressIndicator(
+      value: progress, // Now it's definitely a double
+      backgroundColor: Colors.grey[300],
+      color: isLimitReached ? Colors.red : const Color(0xFF00C853),
+      minHeight: 8,
+      borderRadius: BorderRadius.circular(4),
+    ),
+    
         boxShadow: [
           BoxShadow(
             color: (isMining ? const Color(0xFF00C853) : Colors.grey).withOpacity(0.2),
