@@ -29,24 +29,30 @@ jobs:
         flutter-version: '3.19.0'
         channel: 'stable'
         cache: true
-        - name: Auto bump build number
-  run: |
-    VERSION_LINE=$(grep '^version:' pubspec.yaml)
-    VERSION_NAME=$(echo $VERSION_LINE | cut -d'+' -f1 | cut -d' ' -f2)
-    BUILD_NUMBER=$(echo $VERSION_LINE | cut -d'+' -f2)
-    NEW_BUILD=$((BUILD_NUMBER + 1))
-    sed -i "s/^version:.*/version: $VERSION_NAME+$NEW_BUILD/" pubspec.yaml
 
-    # 4. Install Dependencies
+    # 4. Auto bump build number
+    - name: Auto bump build number
+      run: |
+        VERSION_LINE=$(grep '^version:' pubspec.yaml)
+        VERSION_NAME=$(echo $VERSION_LINE | cut -d'+' -f1 | cut -d' ' -f2)
+        BUILD_NUMBER=$(echo $VERSION_LINE | cut -d'+' -f2)
+        NEW_BUILD=$((BUILD_NUMBER + 1))
+
+        sed -i "s/^version:.*/version: $VERSION_NAME+$NEW_BUILD/" pubspec.yaml
+
+        echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+        echo "BUILD_NUMBER=$NEW_BUILD" >> $GITHUB_ENV
+
+    # 5. Install Dependencies
     - name: Install dependencies
       run: flutter pub get
 
-    # 5. Decode Keystore (This creates the file android/app/upload-keystore.jks)
+    # 6. Decode Keystore
     - name: Decode Keystore
       run: |
         echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > android/app/my-release-key.jks
 
-    # 6. Build Signed Release APK
+    # 7. Build Signed Release APK
     - name: Build Signed APK
       run: flutter build apk --release
       env:
@@ -54,21 +60,21 @@ jobs:
         SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
-    # 7. Upload the Signed APK
+    # 8. Upload APK as Artifact
     - name: Upload Signed APK
       uses: actions/upload-artifact@v4
       with:
-        name: SMSindia New Release
+        name: SMSindia-APK
         path: build/app/outputs/flutter-apk/app-release.apk
-        # 8. Send APK to Telegram Group
+
+    # 9. Send APK to Telegram
     - name: Send APK to Telegram
       run: |
         curl -F document=@build/app/outputs/flutter-apk/app-release.apk \
         -F chat_id=${{ secrets.TELEGRAM_TO }} \
         https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument
-        
-        
-    # Telegram Success Message
+
+    # 10. Telegram Success Message
     - name: Telegram Success Message
       if: success()
       run: |
@@ -76,12 +82,12 @@ jobs:
         -d chat_id=${{ secrets.TELEGRAM_TO }} \
         -d parse_mode=Markdown \
         -d text="🎉 *NEW BUILD RELEASED!* 🚀%0A%0A📱 App: *SMSIndia*%0A🔢 Version: *${VERSION_NAME}*%0A🏷️ Build: *${BUILD_NUMBER}*%0A⚙️ CI: GitHub Actions%0A%0A✅ Signed APK uploaded above%0A😄 Happy Testing!"
-        
-        
+
+    # 11. Telegram Failure Alert
     - name: Telegram Failure Alert
       if: failure()
       run: |
         curl -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
         -d chat_id=${{ secrets.TELEGRAM_TO }} \
         -d parse_mode=Markdown \
-        -d text="🚨 *CI BUILD FAILED!* ❌%0A%0A📱 App: *SMSIndia*%0A🔢 Version: *${VERSION_NAME:-Unknown}*%0A🏷️ Build: *${BUILD_NUMBER:-Unknown}*%0A%0A🛠️ Please check GitHub Actions logs."
+        -d text="🚨 *CI BUILD FAILED!* ❌%0A%0A📱 App: *SMSIndia*%0A🛠️ Please check GitHub Actions logs."
