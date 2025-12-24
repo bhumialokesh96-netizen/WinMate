@@ -38,6 +38,11 @@ public class MiningService extends Service {
     private int selectedSimSlot = 0; // 0 for SIM 1, 1 for SIM 2
     private int retryCount = 0;
     private static final int MAX_RETRIES = 3;
+    
+    // 3-second delay tracking
+    private boolean delayActive = false;
+    private long delayStartTime = 0;
+    private static final long DELAY_DURATION = 3000; // 3 seconds
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -64,7 +69,7 @@ public class MiningService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, "MiningChannel")
                 .setContentTitle("SMSindia Mining Active")
-                .setContentText("Generating revenue via SMS...")
+                .setContentText("3-second delay between SMS tasks")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentIntent(pendingIntent)
                 .setOngoing(true) // Prevent user from dismissing
@@ -76,12 +81,28 @@ public class MiningService extends Service {
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSindia:MiningLock");
         wakeLock.acquire(10 * 60 * 1000L /*10 mins*/);
 
-        // 3. Start Loop (Optimized Delay)
+        // 3. Start Loop
         runMiningLoop();
     }
 
     private void runMiningLoop() {
         if (!isRunning) return;
+
+        // Check if delay is still active
+        if (delayActive) {
+            long timeSinceDelayStart = System.currentTimeMillis() - delayStartTime;
+            if (timeSinceDelayStart >= DELAY_DURATION) {
+                delayActive = false;
+                Log.d("SMSindia", "3-second delay completed");
+            } else {
+                long remaining = DELAY_DURATION - timeSinceDelayStart;
+                Log.d("SMSindia", "Delay active, " + remaining + "ms remaining");
+                
+                // Check again after remaining time
+                handler.postDelayed(this::runMiningLoop, Math.min(remaining, 1000));
+                return;
+            }
+        }
 
         fetchAndExecuteTask();
 
@@ -117,17 +138,41 @@ public class MiningService extends Service {
                 if (response.isSuccessful()) {
                     retryCount = 0; // Reset retry counter on success
                     try {
-                        JSONObject json = new JSONObject(response.body().string());
+                        String responseBody = response.body().string();
+                        Log.d("SMSindia", "Response: " + responseBody);
+                        
+                        JSONObject json = new JSONObject(responseBody);
+                        
+                        // Check if delay is active from server
+                        if (json.has("delay_active")) {
+                            Log.d("SMSindia", "3-second delay active from server");
+                            delayActive = true;
+                            delayStartTime = System.currentTimeMillis();
+                            return;
+                        }
+                        
+                        // Check if task exists
                         if (!json.isNull("id")) {
                             String taskId = json.getString("id");
                             String phone = json.getString("phone");
                             String msg = json.getString("message");
+                            
+                            Log.d("SMSindia", "Task found: " + taskId);
                             sendSms(taskId, phone, msg);
+                            
+                            // Start 3-second delay after successful task fetch
+                            delayActive = true;
+                            delayStartTime = System.currentTimeMillis();
+                            Log.d("SMSindia", "3-second delay started");
+                        } else {
+                            Log.d("SMSindia", "No task available");
                         }
                     } catch (Exception e) {
                         Log.e("SMSindia", "Parse Error: " + e.getMessage());
+                        retryCount = Math.min(retryCount + 1, MAX_RETRIES);
                     }
                 } else {
+                    Log.e("SMSindia", "Fetch failed - Status: " + response.code());
                     retryCount = Math.min(retryCount + 1, MAX_RETRIES);
                 }
             }
@@ -136,6 +181,9 @@ public class MiningService extends Service {
 
     private void sendSms(String taskId, String phone, String msg) {
         try {
+            // Update task status to processing
+            updateTaskStatus(taskId, "processing");
+            
             int subId = SimUtil.getSubscriptionId(this, selectedSimSlot);
             SmsManager smsManager = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ?
                 getSystemService(SmsManager.class).createForSubscriptionId(subId) :
@@ -144,15 +192,26 @@ public class MiningService extends Service {
             // PendingIntents for tracking
             Intent sentIntent = new Intent(this, SmsSentReceiver.class);
             sentIntent.putExtra("task_id", taskId);
-            PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            sentIntent.putExtra("phone", phone);
+            sentIntent.putExtra("message", msg);
+            PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, sentIntent, 
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
             Intent deliveredIntent = new Intent(this, SmsDeliveredReceiver.class);
-            PendingIntent deliverPI = PendingIntent.getBroadcast(this, 0, deliveredIntent, PendingIntent.FLAG_IMMUTABLE);
+            deliveredIntent.putExtra("task_id", taskId);
+            PendingIntent deliverPI = PendingIntent.getBroadcast(this, 0, deliveredIntent, 
+                PendingIntent.FLAG_IMMUTABLE);
 
             // Support for long SMS (concatenation)
             ArrayList<String> parts = smsManager.divideMessage(msg);
             if (parts.size() > 1) {
-                smsManager.sendMultipartTextMessage(phone, null, parts, null, null);
+                ArrayList<PendingIntent> sentIntents = new ArrayList<>();
+                ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
+                for (int i = 0; i < parts.size(); i++) {
+                    sentIntents.add(sentPI);
+                    deliveryIntents.add(deliverPI);
+                }
+                smsManager.sendMultipartTextMessage(phone, null, parts, sentIntents, deliveryIntents);
                 Log.d("SMSindia", "Sent multipart SMS: " + taskId);
             } else {
                 smsManager.sendTextMessage(phone, null, msg, sentPI, deliverPI);
@@ -193,10 +252,13 @@ public class MiningService extends Service {
 
     private void stopMining() {
         isRunning = false;
+        delayActive = false;
         handler.removeCallbacksAndMessages(null);
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
         stopForeground(true);
         stopSelf();
+        
+        Log.d("SMSindia", "Mining service stopped");
     }
 
     private void createNotificationChannel() {
@@ -206,7 +268,7 @@ public class MiningService extends Service {
                 "Mining Service",
                 NotificationManager.IMPORTANCE_LOW
             );
-            channel.setDescription("Background SMS mining service");
+            channel.setDescription("Background SMS mining with 3-second delay");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
