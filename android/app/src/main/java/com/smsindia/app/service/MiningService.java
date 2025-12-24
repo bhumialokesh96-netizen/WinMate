@@ -23,6 +23,7 @@ import com.smsindia.app.utils.SimUtil;
 import okhttp3.*;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MiningService extends Service {
     // CONFIGURATION
@@ -35,6 +36,8 @@ public class MiningService extends Service {
     private String userId;
     private boolean isRunning = false;
     private int selectedSimSlot = 0; // 0 for SIM 1, 1 for SIM 2
+    private int retryCount = 0;
+    private static final int MAX_RETRIES = 3;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -63,36 +66,37 @@ public class MiningService extends Service {
                 .setContentTitle("SMSindia Mining Active")
                 .setContentText("Generating revenue via SMS...")
                 .setSmallIcon(R.mipmap.ic_launcher)
-
                 .setContentIntent(pendingIntent)
+                .setOngoing(true) // Prevent user from dismissing
                 .build();
         startForeground(1, notification);
 
-        // 2. Acquire WakeLock (Keep CPU On)
+        // 2. Acquire WakeLock (Optimized for Battery)
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SMSindia:MiningLock");
-        wakeLock.acquire(10*60*1000L /*10 mins*/);
+        wakeLock.acquire(10 * 60 * 1000L /*10 mins*/);
 
-        // 3. Start Loop
+        // 3. Start Loop (Optimized Delay)
         runMiningLoop();
     }
 
     private void runMiningLoop() {
         if (!isRunning) return;
 
-        // Fetch task from Supabase via HTTP RPC
         fetchAndExecuteTask();
 
-        // Repeat every 10 seconds
-        handler.postDelayed(this::runMiningLoop, 10000);
+        // Adjust delay dynamically based on network conditions
+        long delay = (retryCount > 0) ? 30000 : 10000; // 30s if retrying, else 10s
+        handler.postDelayed(this::runMiningLoop, delay);
     }
 
     private void fetchAndExecuteTask() {
-        if(userId == null) return;
+        if (userId == null) return;
         
-        // JSON Body for RPC
-        String jsonBody = "{\"p_user_id\": \"" + userId + "\", \"p_sim_slot\": " + selectedSimSlot + "}";
-        RequestBody body = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
+        RequestBody body = RequestBody.create(
+            "{\"p_user_id\": \"" + userId + "\", \"p_sim_slot\": " + selectedSimSlot + "}",
+            MediaType.parse("application/json; charset=utf-8")
+        );
 
         Request request = new Request.Builder()
                 .url(SUPABASE_URL + "/rest/v1/rpc/fetch_mining_task")
@@ -105,26 +109,26 @@ public class MiningService extends Service {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.e("SMSindia", "Network Error: " + e.getMessage());
+                retryCount = Math.min(retryCount + 1, MAX_RETRIES);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    retryCount = 0; // Reset retry counter on success
                     try {
-                        String respStr = response.body().string();
-                        JSONObject json = new JSONObject(respStr);
-                        
-                        // Check if we got a task ID
+                        JSONObject json = new JSONObject(response.body().string());
                         if (!json.isNull("id")) {
                             String taskId = json.getString("id");
                             String phone = json.getString("phone");
                             String msg = json.getString("message");
-                            
                             sendSms(taskId, phone, msg);
                         }
                     } catch (Exception e) {
                         Log.e("SMSindia", "Parse Error: " + e.getMessage());
                     }
+                } else {
+                    retryCount = Math.min(retryCount + 1, MAX_RETRIES);
                 }
             }
         });
@@ -133,15 +137,11 @@ public class MiningService extends Service {
     private void sendSms(String taskId, String phone, String msg) {
         try {
             int subId = SimUtil.getSubscriptionId(this, selectedSimSlot);
-            SmsManager smsManager;
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                smsManager = getSystemService(SmsManager.class).createForSubscriptionId(subId);
-            } else {
-                smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
-            }
+            SmsManager smsManager = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ?
+                getSystemService(SmsManager.class).createForSubscriptionId(subId) :
+                SmsManager.getSmsManagerForSubscriptionId(subId);
 
-            // PendingIntents for Status
+            // PendingIntents for tracking
             Intent sentIntent = new Intent(this, SmsSentReceiver.class);
             sentIntent.putExtra("task_id", taskId);
             PendingIntent sentPI = PendingIntent.getBroadcast(this, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
@@ -149,8 +149,15 @@ public class MiningService extends Service {
             Intent deliveredIntent = new Intent(this, SmsDeliveredReceiver.class);
             PendingIntent deliverPI = PendingIntent.getBroadcast(this, 0, deliveredIntent, PendingIntent.FLAG_IMMUTABLE);
 
-            smsManager.sendTextMessage(phone, null, msg, sentPI, deliverPI);
-            Log.d("SMSindia", "Sending SMS: " + taskId);
+            // Support for long SMS (concatenation)
+            ArrayList<String> parts = smsManager.divideMessage(msg);
+            if (parts.size() > 1) {
+                smsManager.sendMultipartTextMessage(phone, null, parts, null, null);
+                Log.d("SMSindia", "Sent multipart SMS: " + taskId);
+            } else {
+                smsManager.sendTextMessage(phone, null, msg, sentPI, deliverPI);
+                Log.d("SMSindia", "Sent SMS: " + taskId);
+            }
 
         } catch (Exception e) {
             Log.e("SMSindia", "SMS Send Failed: " + e.getMessage());
@@ -158,24 +165,27 @@ public class MiningService extends Service {
         }
     }
 
-    // Static method called by Receiver to update DB
     public static void updateTaskStatus(String taskId, String status) {
-        String jsonBody = "{\"status\": \"" + status + "\"}";
-        RequestBody body = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
+        RequestBody body = RequestBody.create(
+            "{\"status\": \"" + status + "\"}",
+            MediaType.parse("application/json; charset=utf-8")
+        );
 
         Request request = new Request.Builder()
                 .url(SUPABASE_URL + "/rest/v1/sms_tasks?id=eq." + taskId)
                 .addHeader("apikey", SUPABASE_KEY)
                 .addHeader("Authorization", "Bearer " + SUPABASE_KEY)
                 .addHeader("Prefer", "return=minimal")
-                .patch(body) // PATCH update
+                .patch(body)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) { }
+            public void onFailure(Call call, IOException e) {
+                Log.e("SMSindia", "Failed to update task status: " + e.getMessage());
+            }
             @Override
-            public void onResponse(Call call, Response response) { 
+            public void onResponse(Call call, Response response) {
                 Log.d("SMSindia", "Task " + taskId + " marked as " + status);
             }
         });
@@ -183,6 +193,7 @@ public class MiningService extends Service {
 
     private void stopMining() {
         isRunning = false;
+        handler.removeCallbacksAndMessages(null);
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
         stopForeground(true);
         stopSelf();
@@ -190,11 +201,18 @@ public class MiningService extends Service {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("MiningChannel", "Mining Service", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(
+                "MiningChannel",
+                "Mining Service",
+                NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Background SMS mining service");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
 
     @Override
-    public IBinder onBind(Intent intent) { return null; }
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 }
