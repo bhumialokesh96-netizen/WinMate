@@ -1,8 +1,8 @@
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants.dart';
 import '../models/user_model.dart';
+import '../utils/code_generator.dart';
 
 /// Enhanced Supabase Service with better error handling and performance optimizations
 class SupabaseService {
@@ -77,7 +77,7 @@ class SupabaseService {
       }
 
       // C. Generate My Own Invite Code (Random 6 chars)
-      String myInviteCode = _generateRandomCode();
+      String myInviteCode = CodeGenerator.generateInviteCode();
 
       // D. Insert into Public Users Table with retry logic
       int retries = 3;
@@ -214,12 +214,5 @@ class SupabaseService {
   void clearCache() {
     _cachedUser = null;
     _cacheTime = null;
-  }
-
-  // Helper: Generate Random Invite Code (e.g., "WM8291")
-  String _generateRandomCode() {
-    var r = Random();
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return 'WM' + List.generate(4, (index) => chars[r.nextInt(chars.length)]).join();
   }
 }

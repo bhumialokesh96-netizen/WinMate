@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:SMSindia/features/auth/login_screen.dart';
 import 'package:SMSindia/features/dashboard/main_nav_screen.dart';
+import 'package:SMSindia/utils/code_generator.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -47,12 +48,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => isLoading = true);
     
     try {
+      // Generate a unique invite code for this user
+      String inviteCode = CodeGenerator.generateInviteCode();
+      
       await supabase.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         data: {
           'phone': _phoneController.text.trim(),
           'referred_by': _referralController.text.trim(),
+          'invite_code': inviteCode,
         },
       );
 
