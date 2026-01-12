@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:SMSindia/features/auth/login_screen.dart';
 import 'package:SMSindia/features/dashboard/main_nav_screen.dart';
+import 'package:SMSindia/utils/code_generator.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -25,13 +26,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   static const primaryGreen = Color(0xFF00C853);
   static const lightGreen = Color(0xFFE8F5E9);
   static const accentOrange = Color(0xFFFF9100);
-
-  // Helper: Generate Random Invite Code (e.g., "WM8291")
-  String _generateRandomInviteCode() {
-    var r = Random();
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return 'WM' + List.generate(4, (index) => chars[r.nextInt(chars.length)]).join();
-  }
 
   Future<void> _signUp() async {
     if (_emailController.text.isEmpty || 
@@ -56,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     
     try {
       // Generate a unique invite code for this user
-      String inviteCode = _generateRandomInviteCode();
+      String inviteCode = CodeGenerator.generateInviteCode();
       
       await supabase.auth.signUp(
         email: _emailController.text.trim(),
