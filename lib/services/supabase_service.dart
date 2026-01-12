@@ -545,7 +545,7 @@ class SupabaseService {
       final data = await _client
           .from('support_links')
           .select()
-          .single();
+          .maybeSingle();
       return data;
     } catch (e) {
       _log('Error fetching support links', error: e);
