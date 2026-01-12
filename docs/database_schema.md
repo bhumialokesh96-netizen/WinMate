@@ -311,7 +311,7 @@ support_links (independent - single row)
 ### 4. Performance Best Practices
 - Batch operations where possible
 - Use transactions for multiple related operations
-- Implement retry logic for failed operations (3 retries, 1s delay)
+- Implement retry logic for failed operations (3 retries with 1-second delay between attempts, specifically for critical insert operations like user registration)
 - Add proper validation before database calls
 
 ---
@@ -520,15 +520,19 @@ CREATE POLICY "Public read notifications"
 ```dart
 class Constants {
   static const String supabaseUrl = 'https://appfwrpynfxfpcvpavso.supabase.co';
-  static const String supabaseAnonKey = 'YOUR_ANON_KEY_HERE';
+  static const String supabaseAnonKey = 'YOUR_ANON_KEY_HERE'; // Anon key is safe for client-side use
   
-  // Table names
+  // Table names (commonly used)
   static const String usersTable = 'users';
   static const String tasksTable = 'sms_tasks';
-  static const String weeklyStatsTable = 'weekly_stats';
   static const String wheelPrizesTable = 'wheel_prizes';
+  
+  // Note: Other tables (withdrawals, sim_settings, invites, faqs, 
+  // system_notifications, support_links) are referenced directly in code
 }
 ```
+
+**Security Note**: Supabase anon keys are designed to be public and used in client-side code. They work in conjunction with Row-Level Security (RLS) policies to control data access. For production deployments, consider using environment variables to manage configuration across different environments.
 
 **Initialization**: `lib/main.dart`
 

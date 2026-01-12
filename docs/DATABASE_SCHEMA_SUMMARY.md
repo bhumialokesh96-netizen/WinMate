@@ -147,7 +147,7 @@ CREATE INDEX idx_wheel_prizes_active ON wheel_prizes(is_active);
 | Cached user lookup | <100ms | ✅ <50ms |
 | Fresh user lookup | <500ms | ✅ <300ms |
 | Transaction list | <1s | ✅ <800ms |
-| Leaderboard | <2s | ⚠️ Varies |
+| Leaderboard | <2s | ⚠️ <1s for <1000 users, <3s for 10k+ users |
 
 ---
 

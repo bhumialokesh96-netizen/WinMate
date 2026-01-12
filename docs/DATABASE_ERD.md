@@ -144,8 +144,8 @@ users (1) ──────→ (N) invites          [as inviter]
 
 Example:
 User A (invite_code: WM1234) refers User B
-User B (referrer_code: WM1234) refers User C
-User C (referrer_code: User_B_code)
+User B (referrer_code: WM1234, invite_code: WM5678) refers User C
+User C (referrer_code: WM5678, invite_code: WM9012)
 
 Forms multi-level referral tree
 ```
