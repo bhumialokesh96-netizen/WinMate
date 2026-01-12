@@ -34,4 +34,10 @@ A Flutter-based mobile application that gamifies SMS mining with rewards, referr
 3. Configure Supabase in `lib/core/constants.dart`
 4. Run `flutter run`
 
-See `docs/database_schema.md` for database details.
+## Documentation
+
+- **[Database Schema](docs/database_schema.md)** - Complete database schema with 9 tables, relationships, and optimization strategies
+- **[Database Schema Summary](docs/DATABASE_SCHEMA_SUMMARY.md)** - Quick reference guide for developers
+- **[Database ERD](docs/DATABASE_ERD.md)** - Visual entity relationship diagrams and data flow
+- **[Implementation Guide](docs/implementation_guide.md)** - Developer migration guide
+- **[Security Best Practices](docs/security_best_practices.md)** - Security checklist
