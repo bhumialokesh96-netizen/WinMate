@@ -69,11 +69,11 @@ class WheelPrizeModel {
   // Get display text for the prize
   String get displayText {
     if (isCash) {
-      return '₹${value.toStringAsFixed(0)}';
+      return '₹${value.round()}';
     } else if (isSpin) {
-      return '${value.toInt()} Spins';
+      return '${value.round()} Spins';
     } else {
-      return '${value.toInt()}x Bonus';
+      return '${value.round()}x Bonus';
     }
   }
 }

@@ -363,7 +363,12 @@ class SupabaseService {
           .select('sent_today')
           .eq('user_id', userId)
           .eq('sim_slot', simSlot)
-          .single();
+          .maybeSingle();
+      
+      if (settings == null) {
+        _log('SIM settings not found for user $userId slot $simSlot');
+        return false;
+      }
       
       final newCount = (settings['sent_today'] ?? 0) + 1;
       
@@ -498,11 +503,10 @@ class SupabaseService {
           .select('category')
           .eq('is_visible', true);
       
-      final categories = <String>{};
-      for (var item in data) {
-        categories.add(item['category'] as String);
-      }
-      return categories.toList();
+      return data
+          .map<String>((item) => item['category'] as String)
+          .toSet()
+          .toList();
     } catch (e) {
       _log('Error fetching FAQ categories', error: e);
       return null;
@@ -516,21 +520,15 @@ class SupabaseService {
   // Get active system notifications
   Future<List<Map<String, dynamic>>?> getSystemNotifications() async {
     try {
+      final now = DateTime.now().toIso8601String();
       final data = await _client
           .from('system_notifications')
           .select()
           .eq('is_active', true)
+          .or('expires_at.is.null,expires_at.gt.$now')
           .order('created_at', ascending: false);
       
-      // Filter out expired notifications client-side
-      final now = DateTime.now();
-      final filtered = data.where((notif) {
-        if (notif['expires_at'] == null) return true;
-        final expiresAt = DateTime.parse(notif['expires_at']);
-        return now.isBefore(expiresAt);
-      }).toList();
-      
-      return List<Map<String, dynamic>>.from(filtered);
+      return List<Map<String, dynamic>>.from(data);
     } catch (e) {
       _log('Error fetching system notifications', error: e);
       return null;
