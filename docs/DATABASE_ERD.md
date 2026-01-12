@@ -448,7 +448,7 @@ ORDER BY created_at DESC;
 
 ## Related Documentation
 
-- **Full Schema Details**: [database_schema.md](./database_schema.md)
+- **Full Schema Details**: [database_schema.md](./database_schema.md) (559 lines)
 - **Quick Reference**: [DATABASE_SCHEMA_SUMMARY.md](./DATABASE_SCHEMA_SUMMARY.md)
 - **Implementation Guide**: [implementation_guide.md](./implementation_guide.md)
 

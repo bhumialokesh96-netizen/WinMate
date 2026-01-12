@@ -263,7 +263,7 @@ WHERE u.id IS NULL;
 
 ## Related Documentation
 
-- **Full Schema**: [database_schema.md](./database_schema.md) (555 lines)
+- **Full Schema**: [database_schema.md](./database_schema.md) (560 lines)
 - **Implementation Guide**: [implementation_guide.md](./implementation_guide.md)
 - **Security Best Practices**: [security_best_practices.md](./security_best_practices.md)
 - **Service Layer**: `lib/services/supabase_service.dart`
