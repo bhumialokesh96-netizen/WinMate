@@ -519,7 +519,7 @@ CREATE POLICY "Public read notifications"
 
 ```dart
 class Constants {
-  static const String supabaseUrl = 'https://appfwrpynfxfpcvpavso.supabase.co';
+  static const String supabaseUrl = 'https://your-project.supabase.co';
   static const String supabaseAnonKey = 'YOUR_ANON_KEY_HERE'; // Anon key is safe for client-side use
   
   // Table names (commonly used)
@@ -533,6 +533,15 @@ class Constants {
 ```
 
 **Security Note**: Supabase anon keys are designed to be public and used in client-side code. They work in conjunction with Row-Level Security (RLS) policies to control data access. For production deployments, consider using environment variables to manage configuration across different environments.
+
+**Initialization**: `lib/main.dart`
+
+```dart
+await Supabase.initialize(
+  url: Constants.supabaseUrl,
+  anonKey: Constants.supabaseAnonKey,
+);
+```
 
 **Initialization**: `lib/main.dart`
 
