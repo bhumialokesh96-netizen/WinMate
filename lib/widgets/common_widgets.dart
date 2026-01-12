@@ -159,6 +159,20 @@ class AchievementBadge extends StatelessWidget {
 }
 
 /// Stat Card Widget for displaying statistics
+/// 
+/// Usage:
+/// ```dart
+/// StatCard(
+///   icon: Icons.account_balance_wallet,
+///   title: 'Balance',
+///   value: '₹100.00',
+///   color: Colors.green,
+/// )
+/// ```
+/// 
+/// Best suited for numeric statistics with icons
+/// Recommended icon types: Material Icons for consistency
+/// Value should be formatted as string with appropriate units
 class StatCard extends StatelessWidget {
   final IconData icon;
   final String title;

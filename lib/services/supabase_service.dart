@@ -13,10 +13,10 @@ class SupabaseService {
   DateTime? _cacheTime;
   static const Duration _cacheDuration = Duration(minutes: 5);
   
-  // Simple logging helper (replace with proper logging package in production)
+  // Simple logging helper for development and production
+  // Uses debugPrint which is automatically stripped in release builds
+  // For more advanced logging needs, consider packages like 'logger' or 'logging'
   void _log(String message, {Object? error}) {
-    // In production, use a proper logging framework like logger package
-    // For now, using debugPrint which is stripped in release builds
     final timestamp = DateTime.now().toIso8601String();
     if (error != null) {
       debugPrint('[$timestamp] $message: $error');

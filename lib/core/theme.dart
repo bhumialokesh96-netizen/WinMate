@@ -263,13 +263,13 @@ class AppTheme {
   }
   
   /// Pattern overlay for background
+  /// Uses a simple semi-transparent overlay effect for visual depth
   static Widget patternOverlay() {
     return Opacity(
       opacity: 0.05,
       child: Container(
         decoration: BoxDecoration(
           color: white.withOpacity(0.05),
-          // Using simple pattern instead of external URL for better performance and reliability
         ),
       ),
     );
