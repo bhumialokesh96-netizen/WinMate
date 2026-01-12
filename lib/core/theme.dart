@@ -267,11 +267,9 @@ class AppTheme {
     return Opacity(
       opacity: 0.05,
       child: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage("https://www.transparenttextures.com/patterns/cubes.png"),
-            repeat: ImageRepeat.repeat,
-          ),
+        decoration: BoxDecoration(
+          color: white.withOpacity(0.05),
+          // Using simple pattern instead of external URL for better performance and reliability
         ),
       ),
     );

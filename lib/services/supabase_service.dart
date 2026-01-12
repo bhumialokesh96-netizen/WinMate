@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/constants.dart';
 import '../models/user_model.dart';
@@ -11,6 +12,18 @@ class SupabaseService {
   UserModel? _cachedUser;
   DateTime? _cacheTime;
   static const Duration _cacheDuration = Duration(minutes: 5);
+  
+  // Simple logging helper (replace with proper logging package in production)
+  void _log(String message, {Object? error}) {
+    // In production, use a proper logging framework like logger package
+    // For now, using debugPrint which is stripped in release builds
+    final timestamp = DateTime.now().toIso8601String();
+    if (error != null) {
+      debugPrint('[$timestamp] $message: $error');
+    } else {
+      debugPrint('[$timestamp] $message');
+    }
+  }
 
   // 1. CHECK IF INVITE CODE EXISTS (Required for Signup)
   Future<bool> validateInviteCode(String code) async {
@@ -23,7 +36,7 @@ class SupabaseService {
       
       return response != null;
     } catch (e) {
-      print('Error validating invite code: $e');
+      _log('Error validating invite code', error: e);
       return false;
     }
   }
@@ -75,7 +88,7 @@ class SupabaseService {
             'device_id': 'ANDROID_ID_PLACEHOLDER',
             'balance': 0.0,
             'spins_available': 1,
-            'created_at': DateTime.now().toIso8601String(),
+            // Let database handle created_at timestamp automatically
           });
           break;
         } catch (e) {
@@ -144,7 +157,7 @@ class SupabaseService {
       
       return _cachedUser;
     } catch (e) {
-      print('Error fetching user: $e');
+      _log('Error fetching user', error: e);
       return null;
     }
   }
@@ -163,7 +176,7 @@ class SupabaseService {
       
       return true;
     } catch (e) {
-      print('Error updating balance: $e');
+      _log('Error updating balance', error: e);
       return false;
     }
   }
@@ -182,7 +195,7 @@ class SupabaseService {
       
       return true;
     } catch (e) {
-      print('Error updating spins: $e');
+      _log('Error updating spins', error: e);
       return false;
     }
   }
