@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants.dart';
+import 'core/theme.dart';
 import 'features/auth/login_screen.dart';
 import 'features/dashboard/main_nav_screen.dart';
 
@@ -19,9 +20,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SMSindia',
+      title: 'WinMate',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.orange),
+      theme: AppTheme.getTheme(),
       home: Supabase.instance.client.auth.currentUser != null
           ? const MainNavScreen()
           : const LoginScreen(),
