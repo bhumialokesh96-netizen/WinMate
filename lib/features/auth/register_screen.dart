@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,6 +26,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   static const lightGreen = Color(0xFFE8F5E9);
   static const accentOrange = Color(0xFFFF9100);
 
+  // Helper: Generate Random Invite Code (e.g., "WM8291")
+  String _generateRandomInviteCode() {
+    var r = Random();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return 'WM' + List.generate(4, (index) => chars[r.nextInt(chars.length)]).join();
+  }
+
   Future<void> _signUp() async {
     if (_emailController.text.isEmpty || 
         _passwordController.text.isEmpty || 
@@ -47,12 +55,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => isLoading = true);
     
     try {
+      // Generate a unique invite code for this user
+      String inviteCode = _generateRandomInviteCode();
+      
       await supabase.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         data: {
           'phone': _phoneController.text.trim(),
           'referred_by': _referralController.text.trim(),
+          'invite_code': inviteCode,
         },
       );
 
