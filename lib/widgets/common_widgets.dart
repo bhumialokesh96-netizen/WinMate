@@ -166,7 +166,7 @@ class AchievementBadge extends StatelessWidget {
 ///   icon: Icons.account_balance_wallet,
 ///   title: 'Balance',
 ///   value: '₹100.00',
-///   color: Colors.green,
+///   color: AppTheme.success,
 /// )
 /// ```
 /// 

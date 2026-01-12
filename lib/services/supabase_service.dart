@@ -17,11 +17,14 @@ class SupabaseService {
   // Uses debugPrint which is automatically stripped in release builds
   // For more advanced logging needs, consider packages like 'logger' or 'logging'
   void _log(String message, {Object? error}) {
-    final timestamp = DateTime.now().toIso8601String();
-    if (error != null) {
-      debugPrint('[$timestamp] $message: $error');
-    } else {
-      debugPrint('[$timestamp] $message');
+    // Only compute timestamp in debug mode to avoid unnecessary work in production
+    if (kDebugMode) {
+      final timestamp = DateTime.now().toIso8601String();
+      if (error != null) {
+        debugPrint('[$timestamp] $message: $error');
+      } else {
+        debugPrint('[$timestamp] $message');
+      }
     }
   }
 
