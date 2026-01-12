@@ -7,6 +7,7 @@ class UserModel {
   final int spinsAvailable;
   final int totalSms;
   final int totalInvites;
+  final double totalEarn;
 
   UserModel({
     required this.id,
@@ -17,6 +18,7 @@ class UserModel {
     required this.spinsAvailable,
     required this.totalSms,
     required this.totalInvites,
+    required this.totalEarn,
   });
 
   // Factory: Create User from JSON (Database Row)
@@ -30,6 +32,7 @@ class UserModel {
       spinsAvailable: json['spins_available'] ?? 0,
       totalSms: json['total_sms_sent'] ?? 0,
       totalInvites: json['total_invites'] ?? 0,
+      totalEarn: (json['total_earn'] ?? 0).toDouble(),
     );
   }
 }
